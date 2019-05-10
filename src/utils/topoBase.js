@@ -25,7 +25,8 @@ export default class Topo extends Base {
         this.options = {
             width: null,
             height: null,
-            click: null
+            click: null,
+            data:[]
         }
         /* 判断是否有canvas */
         this.canvas = document.querySelector(options.el)
@@ -40,8 +41,7 @@ export default class Topo extends Base {
         this._init(options);
         //是否需要点击
         if (this.hasOwn(options, "click")) {
-            if (typeof options['click'] === "function") {
-                console.log(options.click)
+            if (typeof options['click'] === "function") { 
                 this.setOption(this.options, {
                     click: options.click
                 })
@@ -175,6 +175,6 @@ export default class Topo extends Base {
             clearInterval(Time);
             typeof endFunc == 'function' ? endFunc() : null;
         }
-    },
+    } 
 }
 

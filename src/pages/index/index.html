@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>网络安全威胁回放</title> 
+	<title>网络安全威胁回放</title>
 	<script type="text/javascript" src="./assets/js/three.min.js"></script>
 	<script type="text/javascript" src="./assets/js/WebGL.js"></script>
 	<script type="text/javascript" src="./assets/js/OrbitControls.js"></script>
@@ -20,7 +20,69 @@
 </head>
 
 <body>
-	<div>
+	<div id="app">
+		<div class="nodes-main" :class="show?'nodes-active':''">
+			<span class="nodes-show" @click="show=!show">
+				{{show?'展开':'关闭'}}
+			</span>
+			<ul class="nodes-items" id="nodes">
+				<li class="nodes-item" v-for="item in items" :key="item.uuid">
+					<span v-html="item.uuid"></span>
+				</li>
+			</ul>
+		</div>
+		<ul class="set-position">
+			<li>
+				<div class="p-name">
+					name:
+				</div>
+				<div class="p-inp">
+					<input type="text" v-model="node.name">
+				</div>
+			</li>
+			<li>
+				<div class="p-name">
+					type:
+				</div>
+				<div class="p-inp">
+					<select name="" v-model="node.type" id="">
+						<option :value="item.value" v-for="item in types" :key="item.value">{{item.name}}</option>
+					</select>
+				</div>
+			</li>
+			<li>
+				<div class="p-name">
+					x:
+				</div>
+				<div class="p-inp">
+					<input type="number" v-model="node.x">
+				</div>
+			</li>
+			<li>
+				<div class="p-name">
+					y:
+				</div>
+				<div class="p-inp">
+					<input type="number" v-model="node.y">
+				</div>
+			</li>
+			<li>
+				<div class="p-name">
+					z:
+				</div>
+				<div class="p-inp">
+					<input type="number" v-model="node.z">
+				</div>
+			</li>
+			<li>
+				<div class="p-name">
+
+				</div>
+				<div  class="p-inp"> 
+					<button class="">保存</button>
+				</div>
+			</li>
+		</ul>
 		<canvas style="width:1000px;height:800px" id="canvas"></canvas>
 	</div>
 </body>

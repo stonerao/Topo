@@ -1,5 +1,91 @@
 #stats {
     position: absolute;
     top: 0;
+    right: 0;
+}
+
+body{
+    background: #000;
+}
+.nodes-main {
+    position: absolute;
     left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 10;
+    min-width: 20px;
+    width: 250px;
+    transition: all .2s;
+}
+
+.nodes-items {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 20px;
+    width: 250px;
+    background: #fffc;
+
+    li {
+        padding: 10px;
+        line-height: 20px;
+        cursor: pointer;
+    }
+}
+
+.nodes-show {
+    display: inline-block;
+    width: 14px;
+    font-size: 14px;
+    position: absolute;
+    top: 50%;
+    right: -20px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #fff;
+
+}
+
+.nodes-active {
+    transform: translateX(-100%)
+}
+
+.set-position {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 300px;
+    background: #fff;
+    padding:10px;
+    border-radius: 5px 0 0 0;
+    li {
+        display: flex;
+        line-height:30px;
+    }
+
+    .p-name {
+        width: 50px;
+    }
+
+    .p-inp {
+        flex:1;
+        input,select{
+            padding:0;
+            margin:0;
+           
+        }
+        input {
+            width: 100%; 
+            height:18px;
+        }
+        select {
+            width: 101%;
+            height:24px;
+        }
+        button{
+            width:100%;
+        }
+    }
+
 }
