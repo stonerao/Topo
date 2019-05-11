@@ -26,7 +26,8 @@ export default class Topo extends Base {
             width: null,
             height: null,
             click: null,
-            data:[]
+            data: [],//存储所有添加的节点
+            links:[]
         }
         /* 判断是否有canvas */
         this.canvas = document.querySelector(options.el)
@@ -41,7 +42,7 @@ export default class Topo extends Base {
         this._init(options);
         //是否需要点击
         if (this.hasOwn(options, "click")) {
-            if (typeof options['click'] === "function") { 
+            if (typeof options['click'] === "function") {
                 this.setOption(this.options, {
                     click: options.click
                 })
@@ -113,7 +114,26 @@ export default class Topo extends Base {
             stateNode.appendChild(this.stats.domElement)
             document.querySelector("body").appendChild(this.stats.domElement)
         }
-        this.animationFrame()
+        this.animationFrame();
+        //常用贴图  
+        this.Material = {
+            line: new THREE.LineBasicMaterial({
+                color: 0xffffff,
+                linewidth: 1,
+                linecap: 'round', //ignored by WebGLRenderer
+                linejoin: 'round' //ignored by WebGLRenderer
+            })
+        }
+    } 
+    dispose(mesh) {
+        /* 删除模型 */
+        mesh.traverse(function (item) {
+            if (item instanceof THREE.Mesh) {
+                item.geometry.dispose(); //删除几何体
+                item.material.dispose(); //删除材质
+            }
+        });
+        this.scene.remove(mesh)
     }
     click(event) {
         var raycaster = new THREE.Raycaster()
@@ -175,6 +195,6 @@ export default class Topo extends Base {
             clearInterval(Time);
             typeof endFunc == 'function' ? endFunc() : null;
         }
-    } 
+    }
 }
 
