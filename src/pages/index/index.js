@@ -6,7 +6,7 @@ import PerfectScrollbar from 'perfect-scrollbar'
 import '../../utils/component'
 import types from '../../utils/type.json'
 import graphs from '../../utils/topo_regular'
-let whileType = types
+
 let VM = new Vue({
     el: "#app",
     data() {
@@ -66,22 +66,27 @@ let VM = new Vue({
  
          })
          this.save()  */
-        let n= 0;
-        this.nodes = graphs.nodes; 
-        let get = (data) => {
-            data.forEach(node => { 
-                node.name = `node-${++n}`
-                if (node.children.length > 0 && Array.isArray(node.children)) {
-                    get(node.children)
-                }
-            })
-        }
-        get(this.nodes)
+        let n = 0;
+        this.nodes = graphs.nodes;
+
         this.links = graphs.links;
         this.save()
-       setTimeout(() => {
+        setTimeout(() => {
             this.restore()
-        }, 1000); 
+
+        }, 1000);
+        setTimeout(()=>{
+            let nodes = topo.options.data.map(x=>{
+                return {
+                    id:x.datas.id,
+                    ...x.position
+                }
+            })
+            console.log(nodes)
+            this.links.forEach(x=>{
+                nodes.filter(y=>y.id==x.src.id)[0]
+            })
+        },3000)
 
     },
     methods: {
@@ -348,14 +353,14 @@ let topo = new Topo({
         /* if (mesh.object.type !== "Mesh") {
             return false
         } */
-         
+
         console.log(mesh)
         /* mesh.object.position.x = 200;
         this.data[0].position.y = 200;
         //把所有节点映射到Vue上面 
-        VM.update(this.data) */ 
+        VM.update(this.data) */
         VM.currNode = data[0].object;
-        
+
         topo.setOption(VM.node, {
             x: VM.currNode.position.x,
             y: VM.currNode.position.y,

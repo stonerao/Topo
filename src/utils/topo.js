@@ -31,25 +31,34 @@ export default class Topo extends Base {
         var mtlLoader = new THREE.MTLLoader();
 
         let scene = this.scene;
-        let node = this.typeMap.filter(x => x.type == type)[0] 
+        let node = this.typeMap.filter(x => x.type == type)[0]
+        const meshAdd=(mesh)=> {
+            let node = mesh.children[0]
+            node.position.set(random(), y, random())
+            node.datas = {
+                type: type,
+                name: name,
+                id: id
+            }
+            this.options.data.push(node)
+            scene.add(node)
+        }
         if (this.hasOwn(node, "obj") && this.hasOwn(node, "mtl")) {
             mtlLoader.load('/assets/model/' + node.mtl, function (materials) {
                 materials.preload();
                 var objLoader = new THREE.OBJLoader();
                 objLoader.setMaterials(materials);
                 objLoader.load('/assets/model/' + node.obj, function (mesh) {
-                    mesh.position.set(random(), y, random())
-                    mesh.datas = {
-                        type: type,
-                        name: name,
-                        id: id
-                    }
-                   
-                    scene.add(mesh)  
+                    meshAdd(mesh)
                 });
             });
+        } else if (this.hasOwn(node, "obj") && !this.hasOwn(node, "mtl")) {
+            var objLoader = new THREE.OBJLoader();
+            objLoader.load('/assets/model/' + node.obj, function (mesh) {
+                meshAdd(mesh)
+            });
         }
-
+        
         /*  switch (parseInt(type)) {
              case 1:
                  
@@ -92,7 +101,7 @@ export default class Topo extends Base {
     }
     updataLink() {
         //更新所有节点
-        let links = this.Vue.links;
+        let links = this.Vue.links; 
         this.options.links.forEach(l => {
             this.dispose(l)
         })
