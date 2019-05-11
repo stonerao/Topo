@@ -64,7 +64,7 @@
 				</div>
 				<div class="p-inp">
 					<select name="" v-model="node.type" id="">
-						<option :value="item.value" v-for="item in types" :key="item.value">{{item.name}}</option>
+						<option v-bind:value="item.type" v-for="item in types" :key="item.type">{{item.name}}</option>
 					</select>
 				</div>
 			</li>
@@ -73,7 +73,7 @@
 					图片
 				</div>
 				<div class="p-inp">
-					<input type="number" v-model="node.x">
+					<input type="number">
 				</div>
 			</li>
 			<li>
@@ -127,7 +127,7 @@
 					</div>
 					<div class="p-inp">
 						<select name="" v-model="node.type" id="">
-							<option :value="item.value" v-for="item in types" :key="item.value">{{item.name}}
+							<option v-bind:value="item.type" v-for="item in types" :key="item.type">{{item.name}}
 							</option>
 						</select>
 					</div>
@@ -137,7 +137,7 @@
 						图片
 					</div>
 					<div class="p-inp">
-						<input type="number" v-model="node.x">
+						<input type="number">
 					</div>
 				</li>
 				<li>

@@ -125,6 +125,7 @@ export default class Topo extends Base {
             })
         }
     } 
+    canvas(){}
     dispose(mesh) {
         /* 删除模型 */
         mesh.traverse(function (item) {

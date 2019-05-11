@@ -4,6 +4,9 @@ import Vue from 'vue/dist/vue.js'
 import "perfect-scrollbar/css/perfect-scrollbar.css";
 import PerfectScrollbar from 'perfect-scrollbar'
 import '../../utils/component'
+import types from '../../utils/type.json'
+import graphs from '../../utils/topo_regular'
+let whileType = types
 let VM = new Vue({
     el: "#app",
     data() {
@@ -18,11 +21,7 @@ let VM = new Vue({
                 type: "",
                 id: ""
             },
-            types: [
-                { name: "路由器", value: "1" },
-                { name: "服务器", value: "2" },
-                { name: "队伍", value: "3" },
-            ],
+            types: JSON.parse(JSON.stringify(types)),
             nodes: [
 
             ],
@@ -51,14 +50,51 @@ let VM = new Vue({
         setTimeout(() => {
             this.new_submit()
         }) */
+        /*  const random = () => {
+             return parseInt(Math.random() * (Math.random() > 0.5 ? 1200 : -1200))
+         }
+         types.forEach(x => {
+             this.nodes.push({
+                 type: x.type,
+                 x: random(),
+                 y: 0,
+                 z: random(),
+                 name: x.name,
+                 id: ++this.max_id,
+                 children: []
+             })
+ 
+         })
+         this.save()  */
+        let n= 0;
+        this.nodes = graphs.nodes; 
+        let get = (data) => {
+            data.forEach(node => { 
+                node.name = `node-${++n}`
+                if (node.children.length > 0 && Array.isArray(node.children)) {
+                    get(node.children)
+                }
+            })
+        }
+        get(this.nodes)
+        this.links = graphs.links;
+        this.save()
+       setTimeout(() => {
+            this.restore()
+        }, 1000); 
+
     },
     methods: {
         restore() {
+            topo.clearAll()
             let data = this.getSaveData()
             let { nodes, links } = JSON.parse(data)
             this.nodes = nodes;
             this.links = links;
             var getNode = (data) => {
+                if (this.max_id <= data.id) {
+                    this.max_id = parseInt(data.id) + 1
+                }
                 topo.addNodes({
                     ...data
                 })
@@ -90,7 +126,6 @@ let VM = new Vue({
         itemdeleteode(id) {
             var getNode = (data) => {
                 if (data.id == id) {
-                    console.log(data)
                     return true
                 }
                 if (data.children.length != 0) {
@@ -103,6 +138,23 @@ let VM = new Vue({
                 }
                 return false
             }
+            let dele_id = []
+            let dele = (data, state) => {
+                data.forEach(node => {
+                    let is_delete = node.id == id || state;
+                    if (is_delete) {
+                        dele_id.push(node.id)
+                    }
+                    if (node.children.length > 0 && Array.isArray(node.children)) {
+                        dele(node.children, is_delete)
+                    }
+                })
+            }
+            dele(JSON.parse(JSON.stringify(this.nodes)), false)
+            dele_id.forEach(x => {
+                topo.deleteNode(x)
+                this.deleteRelatedLink(x)
+            })
             this.nodes.forEach((node, index) => {
                 let is_get = getNode(node);
                 if (is_get) {
@@ -110,7 +162,7 @@ let VM = new Vue({
                 }
             })
 
-            this.deleteRelatedLink(id)
+
         },
         deleteRelatedLink(id) {
             //删除相关连线
@@ -145,9 +197,9 @@ let VM = new Vue({
             this.currNode.position.set(x, y, z)
             this.currNode.datas.type = type;
             this.currNode.datas.name = name;
+
             //更新到nodes
             var getNode = (data) => {
-                console.log(data.id, id)
                 if (data.id == id) {
                     data.name = name;
                     data.x = x;
@@ -164,7 +216,7 @@ let VM = new Vue({
             }
             this.nodes.forEach(node => {
                 getNode(node)
-            }) 
+            })
             //更新link中的数据 
             this.updateLines(this.node)
         },
@@ -184,7 +236,7 @@ let VM = new Vue({
             topo.updataLink()
         },
         new_submit() {
-            //新建
+            //新建 
             let node = {
                 ...this.node,
                 id: this.max_id++,
@@ -234,10 +286,15 @@ let VM = new Vue({
 
         },
         save() {
-            window.localStorage.setItem("graph", JSON.stringify({
+            let data = JSON.stringify({
                 nodes: this.nodes,
                 links: this.links
-            }))
+            })
+            console.log({
+                nodes: this.nodes,
+                links: this.links
+            })
+            window.localStorage.setItem("graph", data)
         },
         getSaveData() {
             return window.localStorage.getItem("graph")
@@ -248,9 +305,11 @@ let VM = new Vue({
     },
     watch: {
         is_new(val) {
-            if (val) {
+            if (!val) {
                 this.clearNodeEdit()
             }
+        },
+        ['node.type'](val) {
         }
     }
 })
@@ -278,6 +337,7 @@ let topo = new Topo({
     stats: true,
     data: [],
     VUE: VM,
+    typeMap: types,
     cameraPosition: {
         x: 300,
         y: 3000,
@@ -285,15 +345,17 @@ let topo = new Topo({
     },
     click: function (data) {
         let mesh = data[0]
-        if (mesh.object.type !== "Mesh") {
+        /* if (mesh.object.type !== "Mesh") {
             return false
-        }
+        } */
+         
+        console.log(mesh)
         /* mesh.object.position.x = 200;
         this.data[0].position.y = 200;
-        //把所有节点映射到Vue上面
-        console.log(this.data)
-        VM.update(this.data) */
+        //把所有节点映射到Vue上面 
+        VM.update(this.data) */ 
         VM.currNode = data[0].object;
+        
         topo.setOption(VM.node, {
             x: VM.currNode.position.x,
             y: VM.currNode.position.y,
