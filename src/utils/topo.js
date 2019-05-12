@@ -88,7 +88,7 @@ export default class Topo extends Base {
                         let routerName = new THREE.Texture(canvas);
                         routerName.needsUpdate = true;
                             var geometry = new THREE.PlaneGeometry(367 / 5.5, 496 / 5.5, 6);
-                        var material = new THREE.MeshBasicMaterial({ map: routerName, color: 0xffff00, side: THREE.DoubleSide });
+                        var material = new THREE.MeshBasicMaterial({ map: routerName,  side: THREE.DoubleSide });
                         var plane = new THREE.Mesh(geometry, material);
                         plane.datas = {
                             type: type,

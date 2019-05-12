@@ -101,29 +101,53 @@ let VM = new Vue({
                 console.log(this.getSaveData())
 
             }, 3000) */
-          
-                  /*       this.node = {
-                            x: "100",
+
+            /*       this.node = {
+                      x: "100",
+                      y: "0",
+                      z: "100",
+                      name: "213",
+                      type: "11",
+                      id: "3",
+                      info: "5.png"
+                  }
+                  this.new_submit()
+                  this.node = {
+                      x: "800",
+                      y: "5",
+                      z: "300",
+                      name: "213",
+                      type: "12",
+                      id: "3",
+                      info: "mini_1.png,512,512,黑盒测试,1"
+                  }
+                  this.new_submit() 
+*/
+            let nodes = graphs.nodes;
+            let links = graphs.links;
+            let index=0;
+            let get = (data) => {
+                data.forEach(node => {
+                    if (node.type == 9) {
+                        if(index<30){
+                            index++;
+                        }
+                        this.addNode({
+                            x: node.x,
                             y: "0",
-                            z: "100",
+                            z: node.z < 0 ? parseFloat(node.z)-180 : parseFloat(node.z)+180,
                             name: "213",
                             type: "11",
                             id: "3",
-                            info: "5.png"
-                        }
-                        this.new_submit()
-                        this.node = {
-                            x: "800",
-                            y: "5",
-                            z: "300",
-                            name: "213",
-                            type: "12",
-                            id: "3",
-                            info: "mini_1.png,512,512,黑盒测试,1"
-                        }
-                        this.new_submit() 
- */
-
+                            info: `${index}.png`
+                        })
+                    }
+                    if (node.children.length > 0 && Array.isArray(node.children)) {
+                        get(node.children)
+                    }
+                })
+            }
+            get(nodes)
 
         }, 3000)
 
@@ -305,6 +329,14 @@ let VM = new Vue({
             })
             topo.updataLink()
         },
+        addNode(node) {
+            node['children'] = [];
+            node['id'] = ++this.max_id;
+            topo.addNodes(node)
+            this.is_new = false;
+            this.itemAdd = null;
+            this.clearNodeEdit()
+        },
         new_submit() {
             //新建 
             let node = {
@@ -427,7 +459,7 @@ let topo = new Topo({
         if (mesh == null) {
             return
         }
-        
+
         // let mesh = data[0].object.type == "Line" ? data[1]:data[0]
         /* if (mesh.object.type !== "Mesh") {
             return false
@@ -437,13 +469,13 @@ let topo = new Topo({
         this.data[0].position.y = 200;
         //把所有节点映射到Vue上面 
         VM.update(this.data) */
-        VM.currNode = mesh 
+        VM.currNode = mesh
         topo.setOption(VM.node, {
             x: VM.currNode.position.x,
             y: VM.currNode.position.y,
             z: VM.currNode.position.z,
             ...VM.currNode.datas
         })
-        
+
     }
 }) 
