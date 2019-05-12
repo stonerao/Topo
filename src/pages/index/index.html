@@ -42,11 +42,12 @@
 				{{show?'展开':'关闭'}}
 			</span>
 			<ul class="nodes-items" id="nodes">
-				<tree-item @clicknode="clcikNode" @itemaddnode="itemaddnode" @itemdeleteode="itemdeleteode" class="item"
-					v-for="item in nodes" :key="item.id" :items="item"></tree-item>
 				<li @click="newNodes(1)">
 					<button>新建节点</button>
 				</li>
+				<tree-item @clicknode="clcikNode" @itemaddnode="itemaddnode" @itemdeleteode="itemdeleteode" class="item"
+					v-for="item in nodes" :key="item.id" :items="item"></tree-item>
+				
 			</ul>
 		</div>
 		<ul class="set-position">
@@ -68,12 +69,12 @@
 					</select>
 				</div>
 			</li>
-			<li v-if="node.type==3">
+			<li v-if="node.type==11||node.type==12">
 				<div class="p-name">
-					图片
+					信息
 				</div>
 				<div class="p-inp">
-					<input type="number">
+					<input type="text" v-model="inp_img">
 				</div>
 			</li>
 			<li>
@@ -132,12 +133,12 @@
 						</select>
 					</div>
 				</li>
-				<li v-if="node.type==3">
+				<li v-if="node.type==11||node.type==12">
 					<div class="p-name">
-						图片
+						信息
 					</div>
 					<div class="p-inp">
-						<input type="number">
+						<input type="number" v-model="inp_img">
 					</div>
 				</li>
 				<li>

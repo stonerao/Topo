@@ -25,8 +25,8 @@
     },
     {
         "type": "5",
-        "obj": "webc4d.obj",
-        "mtl": "webc4d.mtl",
+        "obj": "fuwuqi3.obj",
+        "mtl": "fuwuqi3.mtl",
         "name": "拟态WEB服务器"
     },
     {
@@ -43,8 +43,8 @@
     },
     {
         "type": "8",
-        "obj": "heneizhuji.obj",
-        "mtl": "heneizhuji.mtl",
+        "obj": "heinenizhuji.obj",
+        "mtl": "heinenizhuji.mtl",
         "name": "拟态虚拟主机"
     },
     {

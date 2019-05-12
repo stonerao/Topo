@@ -28,13 +28,12 @@ export default class Topo extends Base {
         const random = () => {
             return parseInt(Math.random() * (Math.random() > 0.5 ? 1200 : -1200))
         }
-        var mtlLoader = new THREE.MTLLoader();
-
+        var mtlLoader = new THREE.MTLLoader(); 
         let scene = this.scene;
         let node = this.typeMap.filter(x => x.type == type)[0]
         const meshAdd=(mesh)=> {
             let node = mesh.children[0]
-            node.position.set(random(), y, random())
+            node.position.set(random(), 0, random())
             node.datas = {
                 type: type,
                 name: name,

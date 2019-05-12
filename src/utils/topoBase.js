@@ -27,7 +27,7 @@ export default class Topo extends Base {
             height: null,
             click: null,
             data: [],//存储所有添加的节点
-            links:[]
+            links: []
         }
         /* 判断是否有canvas */
         this.canvas = document.querySelector(options.el)
@@ -124,8 +124,15 @@ export default class Topo extends Base {
                 linejoin: 'round' //ignored by WebGLRenderer
             })
         }
-    } 
-    canvas(){}
+    }
+    canvasItem({ width = 256, height = 256, img }) {
+        let canvas = document.createElement('canvas');
+        //导入材质
+        var texture = THREE.ImageUtils.loadTexture(img, {}, function () {
+
+        });
+        console.log(texture)
+    }
     dispose(mesh) {
         /* 删除模型 */
         mesh.traverse(function (item) {

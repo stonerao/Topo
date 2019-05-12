@@ -31,6 +31,7 @@ let VM = new Vue({
             max_id: 0,
             itemAdd: null,
             links: [],//连线
+            inp_img:""
         }
     },
     created() {
@@ -68,25 +69,36 @@ let VM = new Vue({
          this.save()  */
         let n = 0;
         this.nodes = graphs.nodes;
-
         this.links = graphs.links;
         this.save()
         setTimeout(() => {
             this.restore()
+            /* setTimeout(() => {
+                let nodes = topo.options.data.map(x => {
+                    return {
+                        id: x.datas.id,
+                        ...x.position
+                    }
+                })
+                this.links.forEach(x => {
+                    let src = nodes.filter(y => y.id == x.src.id)[0]
+                    if (src) {
+                        x.src.x = src.x
+                        x.src.y = src.y
+                        x.src.z = src.z
+                    }
+                    let dst = nodes.filter(y => y.id == x.dst.id)[0]
+                    if (dst) {
+                        x.dst.x = dst.x
+                        x.dst.y = dst.y
+                        x.dst.z = dst.z
+                    }
+                })
+                this.save()
+                console.log(this.getSaveData())
 
-        }, 1000);
-        setTimeout(()=>{
-            let nodes = topo.options.data.map(x=>{
-                return {
-                    id:x.datas.id,
-                    ...x.position
-                }
-            })
-            console.log(nodes)
-            this.links.forEach(x=>{
-                nodes.filter(y=>y.id==x.src.id)[0]
-            })
-        },3000)
+            }, 3000) */
+        }, 3000)
 
     },
     methods: {
