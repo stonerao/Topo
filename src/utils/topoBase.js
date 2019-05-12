@@ -128,10 +128,22 @@ export default class Topo extends Base {
     canvasItem({ width = 256, height = 256, img }) {
         let canvas = document.createElement('canvas');
         //导入材质
-        var texture = THREE.ImageUtils.loadTexture(img, {}, function () {
-
-        });
-        console.log(texture)
+        canvas.width = width;
+        canvas.height = height;
+        let context = canvas.getContext("2d");
+        let _IMG = new Image();
+        _IMG.src = img;
+        _IMG.onload = () => {
+            console.log("cs")
+            context.drawImage(_IMG, 0, 0, width, height);
+            let routerName = new THREE.Texture(canvas);
+            routerName.needsUpdate = true;
+            let sprMat = new THREE.SpriteMaterial({ map: routerName });
+            let spriteText = new THREE.Sprite(sprMat);
+            spriteText._tpye = "team"
+            
+            this.scene.add(spriteText);
+        }
     }
     dispose(mesh) {
         /* 删除模型 */

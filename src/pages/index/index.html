@@ -47,7 +47,7 @@
 				</li>
 				<tree-item @clicknode="clcikNode" @itemaddnode="itemaddnode" @itemdeleteode="itemdeleteode" class="item"
 					v-for="item in nodes" :key="item.id" :items="item"></tree-item>
-				
+
 			</ul>
 		</div>
 		<ul class="set-position">
@@ -138,7 +138,7 @@
 						信息
 					</div>
 					<div class="p-inp">
-						<input type="number" v-model="inp_img">
+						<input type="text" v-model="inp_img" placeholder="队伍直接图片名，地板标题+类型逗号隔开">
 					</div>
 				</li>
 				<li>

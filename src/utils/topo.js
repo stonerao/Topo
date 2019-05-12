@@ -28,12 +28,13 @@ export default class Topo extends Base {
         const random = () => {
             return parseInt(Math.random() * (Math.random() > 0.5 ? 1200 : -1200))
         }
+        let type_id = parseInt(type);
         var mtlLoader = new THREE.MTLLoader(); 
         let scene = this.scene;
         let node = this.typeMap.filter(x => x.type == type)[0]
         const meshAdd=(mesh)=> {
             let node = mesh.children[0]
-            node.position.set(random(), 0, random())
+            node.position.set(x,y,z)
             node.datas = {
                 type: type,
                 name: name,
@@ -42,21 +43,37 @@ export default class Topo extends Base {
             this.options.data.push(node)
             scene.add(node)
         }
-        if (this.hasOwn(node, "obj") && this.hasOwn(node, "mtl")) {
-            mtlLoader.load('/assets/model/' + node.mtl, function (materials) {
-                materials.preload();
+        let obj_arr = [1,2,3,4,5,6,7,8,10];
+        
+        if (obj_arr.includes(type_id)){
+            //有模型
+            if (this.hasOwn(node, "obj") && this.hasOwn(node, "mtl")) {
+                mtlLoader.load('/assets/model/' + node.mtl, function (materials) {
+                    materials.preload();
+                    var objLoader = new THREE.OBJLoader();
+                    objLoader.setMaterials(materials);
+                    objLoader.load('/assets/model/' + node.obj, function (mesh) {
+                        meshAdd(mesh)
+                    });
+                });
+            } else if (this.hasOwn(node, "obj") && !this.hasOwn(node, "mtl")) {
                 var objLoader = new THREE.OBJLoader();
-                objLoader.setMaterials(materials);
                 objLoader.load('/assets/model/' + node.obj, function (mesh) {
                     meshAdd(mesh)
                 });
-            });
-        } else if (this.hasOwn(node, "obj") && !this.hasOwn(node, "mtl")) {
-            var objLoader = new THREE.OBJLoader();
-            objLoader.load('/assets/model/' + node.obj, function (mesh) {
-                meshAdd(mesh)
-            });
+            }
+        }else if(type==11){
+            //队伍
+        }else if(type==12){
+            //地板
+            let node = this.canvasItem({
+                width:1024,
+                height:1024,
+                img:"/assets/image/mini_2.png"
+            })
+            
         }
+        
         
         /*  switch (parseInt(type)) {
              case 1:
@@ -108,8 +125,7 @@ export default class Topo extends Base {
             this.addLink(link)
         })
     }
-    deleteNode(id) {
-        console.log(this.options.data)
+    deleteNode(id) { 
         this.options.data.forEach(node => {
             if (node.datas.id == id) {
                 this.dispose(node)

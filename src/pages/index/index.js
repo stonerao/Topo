@@ -67,10 +67,10 @@ let VM = new Vue({
  
          })
          this.save()  */
-        let n = 0;
+       /*  let n = 0;
         this.nodes = graphs.nodes;
         this.links = graphs.links;
-        this.save()
+        this.save() */
         setTimeout(() => {
             this.restore()
             /* setTimeout(() => {
@@ -307,10 +307,7 @@ let VM = new Vue({
                 nodes: this.nodes,
                 links: this.links
             })
-            console.log({
-                nodes: this.nodes,
-                links: this.links
-            })
+            console.log(data)
             window.localStorage.setItem("graph", data)
         },
         getSaveData() {
