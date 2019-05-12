@@ -112,42 +112,64 @@ let VM = new Vue({
                       info: "5.png"
                   }
                   this.new_submit()
-                  this.node = {
-                      x: "800",
-                      y: "5",
-                      z: "300",
-                      name: "213",
-                      type: "12",
-                      id: "3",
-                      info: "mini_1.png,512,512,黑盒测试,1"
-                  }
-                  this.new_submit() 
+                 
 */
-            let nodes = graphs.nodes;
-            let links = graphs.links;
-            let index=0;
-            let get = (data) => {
-                data.forEach(node => {
-                    if (node.type == 9) {
-                        if(index<30){
-                            index++;
-                        }
-                        this.addNode({
-                            x: node.x,
-                            y: "0",
-                            z: node.z < 0 ? parseFloat(node.z)-180 : parseFloat(node.z)+180,
-                            name: "213",
-                            type: "11",
-                            id: "3",
-                            info: `${index}.png`
-                        })
-                    }
-                    if (node.children.length > 0 && Array.isArray(node.children)) {
-                        get(node.children)
-                    }
-                })
+            this.node = {
+                x: "0",
+                y: "-1",
+                z: "720",
+                name: "213",
+                type: "12",
+                id: "1200",
+                info: "ccccc_1.png,1880,330,选手区,1"
             }
-            get(nodes)
+            this.new_submit()
+            this.node = {
+                x: "0",
+                y: "-1",
+                z: "-720",
+                name: "213",
+                type: "12",
+                id: "1201",
+                info: "ccccc_1.png,1880,330,选手区,1"
+            }
+            this.new_submit()
+            this.node = {
+                x: "558",
+                y: "-1",
+                z: "-7",
+                name: "213",
+                type: "12",
+                id: "1203",
+                info: "ccccc_1.png,420,350,黑盒测试区,1"
+            }
+            this.new_submit()
+            this.node = {
+                x: "-558",
+                y: "-1",
+                z: "-7",
+                name: "213",
+                type: "12",
+                id: "1204",
+                info: "ccccc_1.png,420,350,黑盒测试区,1"
+            }
+            this.new_submit()
+            /*   let nodes = graphs.nodes;
+              let links = graphs.links;
+              let index = 0;
+              let get = (data) => {
+                  data.forEach(node => {
+                      if (node.type == 9) {
+                          if (index < 30) {
+                              index++;
+                          }
+                      }
+                      if (node.children.length > 0 && Array.isArray(node.children)) {
+                          get(node.children)
+                      }
+                  })
+              }
+              get(nodes) */
 
         }, 3000)
 
@@ -179,7 +201,7 @@ let VM = new Vue({
             return graphs
         },
         restore() {
-            topo.clearAll()
+            // topo.clearAll()
             let data = this.getSaveData()
             let { nodes, links } = JSON.parse(data)
             this.nodes = nodes;
@@ -193,7 +215,9 @@ let VM = new Vue({
                 })
                 if (data.children.length != 0) {
                     data.children.forEach((n, index) => {
-                        getNode(n);
+                        setTimeout(() => {
+                            getNode(n);
+                        }, 500)
                     })
                 }
                 return false
@@ -335,6 +359,7 @@ let VM = new Vue({
             topo.addNodes(node)
             this.is_new = false;
             this.itemAdd = null;
+            this.nodes.push(node)
             this.clearNodeEdit()
         },
         new_submit() {
@@ -446,13 +471,13 @@ let topo = new Topo({
     click: function (data) {
         let index = 0;
         let mesh = null
-        console.log(data)
+        console.log(JSON.stringify(data[0].point))
         //如果点击的地板 互相关联
         while (index < data.length) {
             if (data[index].object.type == "Mesh") {
                 mesh = data[index].object;
                 index = data.length
-                console.log(mesh)
+
             }
             index++;
         }

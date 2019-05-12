@@ -104,9 +104,9 @@ export default class Topo extends Base {
             this.controls.autoRotateSpeed = 1; */
         }
         if (helper) {
-            let help = new THREE.GridHelper(2200, 80)
-            help.position.y=-5
-            this.scene.add(help);
+            /*   let help = new THREE.GridHelper(2200, 80)
+              help.position.y=-5
+              this.scene.add(help); */
         }
         if (stats) {
             this.stats = new Stats();
@@ -140,15 +140,31 @@ export default class Topo extends Base {
             func(canvas)
         }
     }
-    loadText({ width = 256, height = 128, text = "" }) {
+    repeatLoadImg({ width = 64, height = 64, conut, img }, func) {
+        let canvas = document.createElement('canvas');
+        //导入材质
+        canvas.width = width * conut;
+        canvas.height = height * conut;
+        let context = canvas.getContext("2d");
+        let _IMG = new Image();
+        _IMG.src = img;
+        _IMG.onload = () => {
+            var pat = context.createPattern(_IMG, "repeat");
+            context.rect(0, 0, width * conut, height * conut);
+            context.fillStyle = pat;
+            context.fill();
+            func(canvas)
+        }
+    }
+    loadText({ width = 256, height = 128, text = "", color ="#ffba47" }) {
         let canvas = document.createElement('canvas');
         //导入材质
         canvas.width = width;
         canvas.height = height;
         let context = canvas.getContext("2d");
-        context.fillStyle = "#ffffff";
+        context.fillStyle = color;
         context.fillRect(0, 0, width, height);
-        context.fill() 
+        context.fill()
         context.closePath()
         context.font = 'bold 32px Arial';
         context.textAlign = 'center';
@@ -156,7 +172,7 @@ export default class Topo extends Base {
         context.fillStyle = '#000000';
         context.lineWidth = 20;
         console.log(text)
-        context.fillText(text,  width / 2, height / 2);
+        context.fillText(text, width / 2, height / 2);
         return canvas;
 
     }

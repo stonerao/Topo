@@ -1,4 +1,6 @@
 import Base from './topoBase'
+const MODEL_SRC = '/assets/model/'
+const IMG_SRC = '/assets/image/'
 export default class Topo extends Base {
     constructor(options) {
         super(options)
@@ -17,8 +19,30 @@ export default class Topo extends Base {
         this.options.data.push(cube) */
         var light = new THREE.AmbientLight(0xffffff); // soft white light
         this.scene.add(light);
-        var directionalLight = new THREE.DirectionalLight(0xffffff, 0.4);
+        var directionalLight = new THREE.DirectionalLight(0xffffff,1);
         this.scene.add(directionalLight);
+        //平铺地板
+        let conut = 120;
+        let wsize = 64;
+        this.repeatLoadImg({
+            width: wsize, height: wsize,
+            conut: conut, img: IMG_SRC + "BG2.png"
+        }, (canvas) => {
+            let routerName = new THREE.Texture(canvas);
+            routerName.needsUpdate = true;
+            let geometry = new THREE.PlaneGeometry(2400, 2400, 6);
+            let material = new THREE.MeshBasicMaterial({ map: routerName, side: THREE.DoubleSide });
+            let plane = new THREE.Mesh(geometry, material);
+            plane.datas = {
+                type: "footer",
+            }
+            plane.rotation.x = Math.PI / 2;
+            plane.position.y = -2;
+            // plane.position.set(x, y, z);
+            this.scene.add(plane);
+            this.options.data.push(plane);
+        })
+
     }
     addNodes({ type, name, x = 0, y = 0, z = 0, id, info }) {
         if (type === "" || name === "") {
@@ -32,18 +56,18 @@ export default class Topo extends Base {
         let node = this.typeMap.filter(x => x.type == type)[0]
         const meshAdd = (mesh) => {
             let node = mesh.children[0]
-            node.position.set(x, y, z) 
+            node.position.set(x, y, z)
             node.datas = {
                 type: type,
                 name: name,
                 id: id
             }
             this.options.data.push(node)
-            if (rotation.includes(type_id)) { 
+            if (rotation.includes(type_id)) {
                 //如果在z为负数  反方向
-               if(z<0){
-                   node.rotation.y = Math.PI
-               }
+                if (z < 0) {
+                    node.rotation.y = Math.PI
+                }
             }
             scene.add(node)
         }
@@ -53,17 +77,17 @@ export default class Topo extends Base {
         if (obj_arr.includes(type_id)) {
             //有模型 
             if (this.hasOwn(node, "obj") && this.hasOwn(node, "mtl")) {
-                mtlLoader.load('/assets/model/' + node.mtl, function (materials) {
+                mtlLoader.load(MODEL_SRC + node.mtl, function (materials) {
                     materials.preload();
                     var objLoader = new THREE.OBJLoader();
                     objLoader.setMaterials(materials);
-                    objLoader.load('/assets/model/' + node.obj, function (mesh) {
-                        meshAdd(mesh) 
+                    objLoader.load(MODEL_SRC + node.obj, function (mesh) {
+                        meshAdd(mesh)
                     });
                 });
             } else if (this.hasOwn(node, "obj") && !this.hasOwn(node, "mtl")) {
                 var objLoader = new THREE.OBJLoader();
-                objLoader.load('/assets/model/' + node.obj, function (mesh) {
+                objLoader.load(MODEL_SRC + node.obj, function (mesh) {
                     meshAdd(mesh)
                 });
             }
@@ -83,12 +107,12 @@ export default class Topo extends Base {
                     this.loadImg({
                         width: 256,
                         height: 256,
-                        img: "/assets/image/" + info
+                        img: IMG_SRC + info
                     }, (canvas) => {
                         let routerName = new THREE.Texture(canvas);
                         routerName.needsUpdate = true;
-                            var geometry = new THREE.PlaneGeometry(367 / 5.5, 496 / 5.5, 6);
-                        var material = new THREE.MeshBasicMaterial({ map: routerName,  side: THREE.DoubleSide });
+                        var geometry = new THREE.PlaneGeometry(367 / 5.5, 496 / 5.5, 6);
+                        var material = new THREE.MeshBasicMaterial({ map: routerName, side: THREE.DoubleSide });
                         var plane = new THREE.Mesh(geometry, material);
                         plane.datas = {
                             type: type,
@@ -97,7 +121,7 @@ export default class Topo extends Base {
                             info: info
                         }
                         plane.rotation.x = -Math.PI / 2 + 0.15;
-                        plane.position.set(x, parseInt(y) + 22, z)
+                        plane.position.set(x, parseInt(y) + 7, z)
                         scene.add(plane)
                         this.options.data.push(plane)
                     })
@@ -109,12 +133,11 @@ export default class Topo extends Base {
                     if (info_arr.length != 5) {
                         console.warn("信息不正确", name)
                         return
-                    }
-
+                    } 
                     this.loadImg({
-                        width: 1024,
-                        height: 1024,
-                        img: "/assets/image/" + info_arr[0]
+                        width: info_arr[1],
+                        height: info_arr[2] ,
+                        img: IMG_SRC + info_arr[0]
                     }, (canvas) => {
                         let routerName = new THREE.Texture(canvas);
                         routerName.needsUpdate = true;
@@ -132,28 +155,32 @@ export default class Topo extends Base {
                         scene.add(plane);
                         this.options.data.push(plane);
                     })
-                    let [twidth,theight] = [256,64]
-                    let textImg = this.loadText({ width: twidth, height: theight, text: info_arr[3] })
-                     
-                    let routerName = new THREE.Texture(textImg);
-                    routerName.needsUpdate = true;
-                    let geometry = new THREE.PlaneGeometry(twidth, theight, 6);
-                    let material = new THREE.MeshBasicMaterial({ map: routerName, side: THREE.DoubleSide });
-                    let plane = new THREE.Mesh(geometry, material);
-                    plane.datas = {
-                        type: type,
-                        name: name,
-                        id: id,
-                        info: info
-                    } 
-                    plane.rotation.z= Math.PI*2;
-                   
-                    let p =(n)=>{
-                        return parseFloat(n)
-                    } 
-                    plane.position.set(x, p(y) + theight/2, p(z)+p(info_arr[2])/2);
-                    scene.add(plane);
-                    this.options.data.push(plane);
+                    if (info_arr[3] != 'false') {
+                        //不需要字的地板 
+                        let [twidth, theight] = [256, 64]
+                        let color = info_arr[4] == '1' ?'#ffba47':'#0094f8'
+                        let textImg = this.loadText({ width: twidth, height: theight, text: info_arr[3], color: color})
+
+                        let routerName = new THREE.Texture(textImg);
+                        routerName.needsUpdate = true;
+                        let geometry = new THREE.PlaneGeometry(twidth, theight, 6);
+                        let material = new THREE.MeshBasicMaterial({ map: routerName, side: THREE.DoubleSide });
+                        let plane = new THREE.Mesh(geometry, material);
+                        plane.datas = {
+                            type: type,
+                            name: name,
+                            id: id,
+                            info: info
+                        }
+                        plane.rotation.z = Math.PI * 2;
+                        plane.rotation.x = -Math.PI /8;
+                        let p = (n) => {
+                            return parseFloat(n)
+                        }
+                        plane.position.set(x, p(y) + theight / 2, p(z) + p(info_arr[2]) / 2 +20);
+                        scene.add(plane);
+                        this.options.data.push(plane);
+                    }
                     break;
             }
 
