@@ -19,7 +19,8 @@ let VM = new Vue({
                 z: "",
                 name: "",
                 type: "",
-                id: ""
+                id: "",
+                info: ""
             },
             types: JSON.parse(JSON.stringify(types)),
             nodes: [
@@ -31,7 +32,8 @@ let VM = new Vue({
             max_id: 0,
             itemAdd: null,
             links: [],//连线
-            inp_img:""
+            inp_img: "",
+            dsc: "队伍直接图片名，地板=图片名,width,height"
         }
     },
     created() {
@@ -67,10 +69,11 @@ let VM = new Vue({
  
          })
          this.save()  */
-       /*  let n = 0;
-        this.nodes = graphs.nodes;
-        this.links = graphs.links;
-        this.save() */
+        /*  let n = 0;
+         this.nodes = graphs.nodes;
+         this.links = graphs.links;
+         this.save() */
+
         setTimeout(() => {
             this.restore()
             /* setTimeout(() => {
@@ -98,10 +101,59 @@ let VM = new Vue({
                 console.log(this.getSaveData())
 
             }, 3000) */
+          
+                  /*       this.node = {
+                            x: "100",
+                            y: "0",
+                            z: "100",
+                            name: "213",
+                            type: "11",
+                            id: "3",
+                            info: "5.png"
+                        }
+                        this.new_submit()
+                        this.node = {
+                            x: "800",
+                            y: "5",
+                            z: "300",
+                            name: "213",
+                            type: "12",
+                            id: "3",
+                            info: "mini_1.png,512,512,黑盒测试,1"
+                        }
+                        this.new_submit() 
+ */
+
+
         }, 3000)
 
     },
     methods: {
+        linksHui(graphs) {
+            let nodes = graphs.nodes;
+            let links = graphs.links;
+            let get = (data) => {
+                data.forEach(node => {
+                    links.forEach(x => {
+                        if (node.id == x.src.id) {
+                            x.src.x = node.x
+                            x.src.y = node.y
+                            x.src.z = node.z
+                        }
+                        if (node.id == x.dst.id) {
+                            x.dst.x = node.x
+                            x.dst.y = node.y
+                            x.dst.z = node.z
+                        }
+                    })
+                    if (node.children.length > 0 && Array.isArray(node.children)) {
+                        get(node.children)
+                    }
+                })
+            }
+            get(nodes)
+            return graphs
+        },
         restore() {
             topo.clearAll()
             let data = this.getSaveData()
@@ -208,9 +260,10 @@ let VM = new Vue({
         },
         save_node() {
             let { x, y, z, type, name, id } = this.node;
-            if (Object.values(this.node).includes("")) {
+            console.log(Object.values(this.node).includes(""))
+            /* if (Object.values(this.node).includes("")) {
                 return
-            }
+            } */
             this.currNode.position.set(x, y, z)
             this.currNode.datas.type = type;
             this.currNode.datas.name = name;
@@ -294,6 +347,7 @@ let VM = new Vue({
                     getNode(node)
                 })
             }
+
             topo.addNodes(node)
             this.is_new = false;
             this.itemAdd = null;
@@ -354,27 +408,42 @@ let topo = new Topo({
     typeMap: types,
     cameraPosition: {
         x: 300,
-        y: 3000,
-        z: 900
+        y: 1000,
+        z: 1800
     },
     click: function (data) {
-        let mesh = data[0]
+        let index = 0;
+        let mesh = null
+        console.log(data)
+        //如果点击的地板 互相关联
+        while (index < data.length) {
+            if (data[index].object.type == "Mesh") {
+                mesh = data[index].object;
+                index = data.length
+                console.log(mesh)
+            }
+            index++;
+        }
+        if (mesh == null) {
+            return
+        }
+        
+        // let mesh = data[0].object.type == "Line" ? data[1]:data[0]
         /* if (mesh.object.type !== "Mesh") {
             return false
         } */
 
-        console.log(mesh)
         /* mesh.object.position.x = 200;
         this.data[0].position.y = 200;
         //把所有节点映射到Vue上面 
         VM.update(this.data) */
-        VM.currNode = data[0].object;
-
+        VM.currNode = mesh 
         topo.setOption(VM.node, {
             x: VM.currNode.position.x,
             y: VM.currNode.position.y,
             z: VM.currNode.position.z,
             ...VM.currNode.datas
         })
+        
     }
 }) 

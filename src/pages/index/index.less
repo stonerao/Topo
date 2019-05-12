@@ -27,7 +27,7 @@ body{
     width: 250px;
     background: #fffc; 
     li {
-        padding-left:7px;
+        padding-left:15px;
         line-height: 28px;
         cursor: pointer;
     }
@@ -45,7 +45,14 @@ body{
     color: #fff;
 
 }
-
+span.active{
+    color:red;
+}
+.cnode{
+    &:hover{
+        color:#cc66aa
+    }
+}
 .nodes-active {
     transform: translateX(-100%)
 }

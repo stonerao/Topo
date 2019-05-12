@@ -3,61 +3,61 @@
         "type": "1",
         "obj": "Team_small_computer.obj",
         "mtl": "Team_small_computer.mtl",
-        "name": "选手主机"
+        "name": "常规赛选手主机"
     },
     {
         "type": "2",
         "obj": "fanghuoqiang.obj",
         "mtl": "fanghuoqiang.mtl",
-        "name": "拟态防火墙"
+        "name": "常规赛拟态防火墙"
     },
     {
         "type": "3",
         "obj": "fuwuqi1.obj",
         "mtl": "fuwuqi1.mtl",
-        "name": "拟态DNS服务器"
+        "name": "常规赛拟态DNS服务器"
     },
     {
         "type": "4",
         "obj": "fuwuqi2.obj",
         "mtl": "fuwuqi2.mtl",
-        "name": "拟态文件存储服务器"
+        "name": "常规赛拟态文件存储服务器"
     },
     {
         "type": "5",
         "obj": "fuwuqi3.obj",
         "mtl": "fuwuqi3.mtl",
-        "name": "拟态WEB服务器"
+        "name": "常规赛拟态WEB服务器"
     },
     {
         "type": "6",
         "obj": "hexinluyouqi.obj",
         "mtl": "hexinluyouqi.mtl",
-        "name": "核心路由器"
+        "name": "常规赛核心路由器"
     },
     {
         "type": "7",
         "obj": "heneiluyouqi.obj",
         "mtl": "heneiluyouqi.mtl",
-        "name": "拟态路由器"
+        "name": "常规赛拟态路由器"
     },
     {
         "type": "8",
         "obj": "heinenizhuji.obj",
         "mtl": "heinenizhuji.mtl",
-        "name": "拟态虚拟主机"
+        "name": "常规赛拟态虚拟主机"
     },
     {
         "type": "9",
         "obj": "switch.obj",
         "mtl": "switch.mtl",
-        "name": "交换机"
+        "name": "常规赛交换机"
     },
     {
         "type": "10",
         "obj": "putongluyouqi.obj",
         "mtl": "putongluyouqi.mtl",
-        "name": "普通路由器"
+        "name": "常规赛路由器"
     },
     {
         "type": "11",
@@ -68,5 +68,59 @@
         "type": "12",
         "img": "",
         "name": "地板"
+    },
+    {
+        "type": "13",
+        "obj": "guangjunzhuji.obj",
+        "mtl": "guangjunzhuji.mtl",
+        "name": "冠军主机"
+    },
+    {
+        "type": "14",
+        "obj": "d-jiaohuanji.obj",
+        "mtl": "d-jiaohuanji.mtl",
+        "name": "冠军区交换机"
+    },
+    {
+        "type": "15",
+        "obj": "d-luyouqi.obj",
+        "mtl": "d-luyouqi.mtl",
+        "name": "附加赛核心路由"
+    },
+    {
+        "type": "16",
+        "obj": "d-fanghuoqiang.obj",
+        "mtl": "d-fanghuoqiang.mtl",
+        "name": "附加赛拟态防火墙"
+    },
+    {
+        "type": "17",
+        "obj": "d-luyouqi1.obj",
+        "mtl": "d-luyouqi1.mtl",
+        "name": "附加赛拟态路由器"
+    },
+    {
+        "type": "18",
+        "obj": "d-luyouqi2.obj",
+        "mtl": "d-luyouqi2.mtl",
+        "name": "附加赛测试区内路由器"
+    },
+    {
+        "type": "19",
+        "obj": "d-fuwuqi3.obj",
+        "mtl": "d-fuwuqi3.mtl",
+        "name": "附加赛拟态WEB服务器"
+    },
+    {
+        "type": "20",
+        "obj": "d-fuwuqi2.obj",
+        "mtl": "d-fuwuqi2.mtl",
+        "name": "附加赛拟态文件存储服务器"
+    },
+    {
+        "type": "21",
+        "obj": "d-fuwuqi1.obj",
+        "mtl": "d-fuwuqi1.mtl",
+        "name": "附加赛拟态DNS服务器"
     }
 ]

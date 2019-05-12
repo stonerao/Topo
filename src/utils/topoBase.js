@@ -56,7 +56,7 @@ export default class Topo extends Base {
         background = 0x04060E,
         controls = false,
         helper = false,
-        cameraPosition = { x: 0, y: 500, z: 0 },
+        cameraPosition = { x: 0, y: 1000, z: 0 },
         stats
     } = options) {
         /* created scene */
@@ -80,7 +80,7 @@ export default class Topo extends Base {
         //场景
         this.scene = new THREE.Scene()
         //透视相机
-        this.camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000);
+        this.camera = new THREE.PerspectiveCamera(45, width / height, 1, 4000);
         //镜头位置 
         this.camera.position.set(...Object.values(cameraPosition))
         //添加
@@ -94,17 +94,19 @@ export default class Topo extends Base {
             //是否可以缩放
             this.controls.enableZoom = true;
             //是否自动旋转controls.autoRotate = true; 设置相机距离原点的最远距离
-            this.controls.minDistance = 30;
+            this.controls.minDistance = 0;
             //设置相机距离原点的最远距离
-            this.controls.maxDistance = 5000;
+            this.controls.maxDistance = 3000;
             //是否开启右键拖拽
             this.controls.enablePan = true;
             this.controls.enableRotate = true;
-            this.controls.autoRotate = true;
-            this.controls.autoRotateSpeed = 1;
+            /* this.controls.autoRotate = true;
+            this.controls.autoRotateSpeed = 1; */
         }
         if (helper) {
-            this.scene.add(new THREE.GridHelper(10000, 200));
+            let help = new THREE.GridHelper(2200, 80)
+            help.position.y=-5
+            this.scene.add(help);
         }
         if (stats) {
             this.stats = new Stats();
@@ -125,7 +127,40 @@ export default class Topo extends Base {
             })
         }
     }
-    canvasItem({ width = 256, height = 256, img }) {
+    loadImg({ width = 256, height = 256, img }, func) {
+        let canvas = document.createElement('canvas');
+        //导入材质
+        canvas.width = width;
+        canvas.height = height;
+        let context = canvas.getContext("2d");
+        let _IMG = new Image();
+        _IMG.src = img;
+        _IMG.onload = () => {
+            context.drawImage(_IMG, 0, 0, width, height);
+            func(canvas)
+        }
+    }
+    loadText({ width = 256, height = 128, text = "" }) {
+        let canvas = document.createElement('canvas');
+        //导入材质
+        canvas.width = width;
+        canvas.height = height;
+        let context = canvas.getContext("2d");
+        context.fillStyle = "#ffffff";
+        context.fillRect(0, 0, width, height);
+        context.fill() 
+        context.closePath()
+        context.font = 'bold 32px Arial';
+        context.textAlign = 'center';
+        context.textBaseline = 'middle';
+        context.fillStyle = '#000000';
+        context.lineWidth = 20;
+        console.log(text)
+        context.fillText(text,  width / 2, height / 2);
+        return canvas;
+
+    }
+    canvasItem({ width = 256, height = 256, img, x, y, z }) {
         let canvas = document.createElement('canvas');
         //导入材质
         canvas.width = width;
@@ -141,9 +176,11 @@ export default class Topo extends Base {
             let sprMat = new THREE.SpriteMaterial({ map: routerName });
             let spriteText = new THREE.Sprite(sprMat);
             spriteText._tpye = "team"
-            
+            spriteText.scale.set(100, 100, 1);
+            spriteText.position.set(x, y, z)
             this.scene.add(spriteText);
         }
+
     }
     dispose(mesh) {
         /* 删除模型 */

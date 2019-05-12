@@ -6,7 +6,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>网络安全威胁回放</title>
 	<script type="text/javascript" src="./assets/js/three.min.js"></script>
-	<script type="text/javascript" src="./assets/js/WebGL.js"></script>
+	<!-- <script type="text/javascript" src="./assets/js/WebGL.js"></script> -->
 	<script type="text/javascript" src="./assets/js/OrbitControls.js"></script>
 	<script type="text/javascript" src="./assets/js/ColladaLoader.js"></script>
 	<script type="text/javascript" src="./assets/js/MTLLoader.js"></script>
@@ -20,7 +20,7 @@
 	<script type="text/x-template" id="item-template">
 		<ul> 
 			<li>
-				<span @click="cnode(items)">
+				<span @click="cnode(items)" class="cnode">
 					{{items.name}}   
 				</span> 
 				<span class="icon-tree" @click="add(items)">+</span>
@@ -74,7 +74,7 @@
 					信息
 				</div>
 				<div class="p-inp">
-					<input type="text" v-model="inp_img">
+					<input type="text" v-model="node.info" :placeholder="dsc">
 				</div>
 			</li>
 			<li>
@@ -138,7 +138,7 @@
 						信息
 					</div>
 					<div class="p-inp">
-						<input type="text" v-model="inp_img" placeholder="队伍直接图片名，地板标题+类型逗号隔开">
+						<input type="text" v-model="node.info" :placeholder="dsc">
 					</div>
 				</li>
 				<li>
