@@ -1,5 +1,5 @@
 import "./index.less";
-import Topo from "../../utils/topo"
+import Topo from "../../utils/graph/global"
 import Vue from 'vue/dist/vue.js'
 import "perfect-scrollbar/css/perfect-scrollbar.css";
 import PerfectScrollbar from 'perfect-scrollbar'
@@ -40,7 +40,6 @@ let VM = new Vue({
 
     },
     mounted() {
-        initScroll("#nodes")
         /* this.node = {
             x: 0,
             y: 0,
@@ -73,35 +72,44 @@ let VM = new Vue({
          this.nodes = graphs.nodes;
          this.links = graphs.links;
          this.save() */
+       /*  var graphs = JSON.parse(this.getSaveData())
+        let nodes = graphs.nodes;
+        let links = graphs.links;
+        let get = (data) => {
+            data.forEach(node => {
+                if (node.type == 11) {
+                    console.log(node)
+                    node.children.forEach((x, i) => {
+                        x.x = parseInt(node.x) + i * 30 - 40
+                        x.z = parseInt(node.z) + 80,
+                            x.y = node.y
+                    })
+                }
+                //    links.forEach(x => {
+                //         if (node.id == x.src.id) {
+                //             x.src.x = node.x
+                //             x.src.y = node.y
+                //             x.src.z = node.z
+                //         }
+                //         if (node.id == x.dst.id) {
+                //             x.dst.x = node.x
+                //             x.dst.y = node.y
+                //             x.dst.z = node.z
+                //         }
+                //     }) 
+                if (node.children.length > 0 && Array.isArray(node.children)) {
+                    get(node.children)
+                }
+            })
+        }
+        get(nodes)
+        let n = this.linksHui(graphs)
+        this.links = n.links;
+        this.nodes = n.nodes;
+        this.save() */
 
         setTimeout(() => {
-            this.restore()
-            /* setTimeout(() => {
-                let nodes = topo.options.data.map(x => {
-                    return {
-                        id: x.datas.id,
-                        ...x.position
-                    }
-                })
-                this.links.forEach(x => {
-                    let src = nodes.filter(y => y.id == x.src.id)[0]
-                    if (src) {
-                        x.src.x = src.x
-                        x.src.y = src.y
-                        x.src.z = src.z
-                    }
-                    let dst = nodes.filter(y => y.id == x.dst.id)[0]
-                    if (dst) {
-                        x.dst.x = dst.x
-                        x.dst.y = dst.y
-                        x.dst.z = dst.z
-                    }
-                })
-                this.save()
-                console.log(this.getSaveData())
-
-            }, 3000) */
-
+            this.restore()   
             /*       this.node = {
                       x: "100",
                       y: "0",
@@ -114,103 +122,24 @@ let VM = new Vue({
                   this.new_submit()
                  
 */
-            /*   this.node = {
-                  x: "0",
-                  y: "-1",
-                  z: "720",
-                  name: "213",
-                  type: "12",
-                  id: "1200",
-                  info: "ccccc_1.png,1880,330,选手区,1"
+
+            /*   let nodes = graphs.nodes;
+              let links = graphs.links;
+              let index = 0;
+              let get = (data) => {
+                  data.forEach(node => {
+                      if (node.type == 9) {
+                          if (index < 30) {
+                              index++;
+                          }
+                      }
+                      if (node.children.length > 0 && Array.isArray(node.children)) {
+                          get(node.children)
+                      }
+                  })
               }
-              this.new_submit()
-              this.node = {
-                  x: "0",
-                  y: "-1",
-                  z: "-720",
-                  name: "213",
-                  type: "12",
-                  id: "1201",
-                  info: "ccccc_1.png,1880,330,选手区,1"
-              }
-              this.new_submit()
-              this.node = {
-                  x: "558",
-                  y: "-1",
-                  z: "-7",
-                  name: "213",
-                  type: "12",
-                  id: "1203",
-                  info: "mini_2.png,420,350,黑盒测试区,1"
-              }
-              this.new_submit()
-              this.node = {
-                  x: "-558",
-                  y: "-1",
-                  z: "-7",
-                  name: "213",
-                  type: "12",
-                  id: "1204",
-                  info: "mini_2.png,420,350,黑盒测试区,1"
-              }
-              this.new_submit() */
-            /*  let nodes = graphs.nodes;
-             let links = graphs.links;
-             let index = 0;
-             let get = (data) => {
-                 data.forEach(node => {
-                     if (node.type == 9) {
-                         if (index < 30) {
-                             index++;
-                         }
-                     }
-                     if (node.children.length > 0 && Array.isArray(node.children)) {
-                         get(node.children)
-                     }
-                 })
-             }
-             get(nodes) */
-            /* 附加赛添加地板 */
-          /*   this.node = {
-                x: "-606",
-                y: "0",
-                z: "-10",
-                name: "213",
-                type: "12",
-                id:this.max_id++,
-                info: "mini_1.png,750,850,常规冠军,2"
-            }
-            this.new_submit()
-            this.node = {
-                x: "606",
-                y: "0",
-                z: "-10",
-                name: "213",
-                type: "12",
-                id:this.max_id++,
-                info: "mini_2.png,750,850,拟态应用场景测试区,1"
-            }
-            this.new_submit()
-            this.node = {
-                x: "-620",
-                y: "0",
-                z: "-1136",
-                name: "213",
-                type: "12",
-                id:this.max_id++,
-                info: "mini_2.png,550,420,黑盒测试区,1"
-            }
-            this.new_submit()
-            this.node = {
-                x: "620",
-                y: "0",
-                z: "-1136",
-                name: "213",
-                type: "12",
-                id:this.max_id++,
-                info: "mini_2.png,550,420,白盒测试区,1"
-            }
-            this.new_submit() */
+              get(nodes) */
+
         }, 3000)
 
     },
@@ -240,9 +169,32 @@ let VM = new Vue({
             get(nodes)
             return graphs
         },
+        returnNode(nodes) {
+            let data_arr = [];
+            let get = (data) => {
+                data.forEach(node => {
+                    data_arr.push({
+                        ...node,
+                        children: []
+                    })
+                    if (node.children.length > 0 && Array.isArray(node.children)) {
+                        get(node.children)
+                    }
+                })
+            }
+            get(nodes)
+            return data_arr
+        },
         restore() {
             // topo.clearAll()
-            let data = this.getSaveData()
+            let data = JSON.parse(this.getSaveData())
+            //把nodes整理成平级渲染
+
+            topo.loadGraph({
+                nodes: this.returnNode(data.nodes),
+                links: data.links
+            })
+            /* 
             let { nodes, links } = JSON.parse(data)
             this.nodes = nodes;
             this.links = links;
@@ -265,7 +217,8 @@ let VM = new Vue({
             this.nodes.forEach((node, index) => {
                 getNode(node);
             })
-            topo.updataLink()
+            topo.updataLink(); */
+
 
         },
         clcikNode(node) {
@@ -409,8 +362,7 @@ let VM = new Vue({
                 id: this.max_id++,
                 children: []
             }
-            console.log(node)
-            if (node.x == "" || node.y == "" || node.z == "" || node.name == "" || node.type == "") {
+            if (Object.values(node).includes("")) {
                 return alert("信息不能为空")
             }
             if (this.itemAdd === null) {
@@ -445,7 +397,7 @@ let VM = new Vue({
                     getNode(node)
                 })
             }
-            console.log(topo.addNodes)
+
             topo.addNodes(node)
             this.is_new = false;
             this.itemAdd = null;
@@ -506,13 +458,13 @@ let topo = new Topo({
     typeMap: types,
     cameraPosition: {
         x: 300,
-        y: 2200,
+        y: 1800,
         z: 1800
     },
     click: function (data) {
         let index = 0;
         let mesh = null
-
+        console.log(JSON.stringify(data[0].point))
         //如果点击的地板 互相关联
         while (index < data.length) {
             if (data[index].object.type == "Mesh") {
@@ -525,8 +477,7 @@ let topo = new Topo({
         if (mesh == null) {
             return
         }
-        // console.log(data)
-        console.log(JSON.stringify(data[0].point))
+
         // let mesh = data[0].object.type == "Line" ? data[1]:data[0]
         /* if (mesh.object.type !== "Mesh") {
             return false

@@ -71,8 +71,8 @@
     },
     {
         "type": "13",
-        "obj": "guangjunzhuji.obj",
-        "mtl": "guangjunzhuji.mtl",
+        "obj": "guanjunzhuji.obj",
+        "mtl": "guanjunzhuji.mtl",
         "name": "冠军主机"
     },
     {
@@ -83,8 +83,8 @@
     },
     {
         "type": "15",
-        "obj": "d-luyouqi.obj",
-        "mtl": "d-luyouqi.mtl",
+        "obj": "d-hexinluyouqi.obj",
+        "mtl": "d-hexinluyouqi.mtl",
         "name": "附加赛核心路由"
     },
     {
@@ -122,5 +122,11 @@
         "obj": "d-fuwuqi1.obj",
         "mtl": "d-fuwuqi1.mtl",
         "name": "附加赛拟态DNS服务器"
+    },
+    {
+        "type": "22",
+        "obj": "d-fanghuoqiang.obj",
+        "mtl": "d-fanghuoqiang.mtl",
+        "name": "大防火墙"
     }
 ]

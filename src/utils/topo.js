@@ -1,6 +1,9 @@
 import Base from './topoBase'
 const MODEL_SRC = '/assets/model/'
 const IMG_SRC = '/assets/image/'
+let obj_arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23];
+let img_type_plane = [11, 12]
+
 export default class Topo extends Base {
     constructor(options) {
         super(options)
@@ -19,7 +22,7 @@ export default class Topo extends Base {
         this.options.data.push(cube) */
         var light = new THREE.AmbientLight(0xffffff); // soft white light
         this.scene.add(light);
-        var directionalLight = new THREE.DirectionalLight(0xffffff,1);
+        var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
         this.scene.add(directionalLight);
         //平铺地板
         let conut = 120;
@@ -30,7 +33,7 @@ export default class Topo extends Base {
         }, (canvas) => {
             let routerName = new THREE.Texture(canvas);
             routerName.needsUpdate = true;
-            let geometry = new THREE.PlaneGeometry(2400, 2400, 6);
+                let geometry = new THREE.PlaneGeometry(3000, 3000, 6);
             let material = new THREE.MeshBasicMaterial({ map: routerName, side: THREE.DoubleSide });
             let plane = new THREE.Mesh(geometry, material);
             plane.datas = {
@@ -48,15 +51,15 @@ export default class Topo extends Base {
         if (type === "" || name === "") {
             alert("类型或者名字不能为空")
             return
-        }
+        } 
         let rotation = [1]
         let type_id = parseInt(type);
         var mtlLoader = new THREE.MTLLoader();
         let scene = this.scene;
-        let node = this.typeMap.filter(x => x.type == type)[0]
+        let node = this.typeMap.filter(x => x.type == type)[0]; 
         const meshAdd = (mesh) => {
-            let node = mesh.children[0]
-            node.position.set(x, y, z)
+            let node = mesh
+            node.position.set(x, y, z) 
             node.datas = {
                 type: type,
                 name: name,
@@ -71,8 +74,6 @@ export default class Topo extends Base {
             }
             scene.add(node)
         }
-        let obj_arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-        let img_type_plane = [11, 12]
 
         if (obj_arr.includes(type_id)) {
             //有模型 
@@ -81,14 +82,14 @@ export default class Topo extends Base {
                     materials.preload();
                     var objLoader = new THREE.OBJLoader();
                     objLoader.setMaterials(materials);
-                    objLoader.load(MODEL_SRC + node.obj, function (mesh) {
-                        meshAdd(mesh)
+                    objLoader.load(MODEL_SRC + node.obj, function (mesh) { 
+                        meshAdd(mesh.children[0])
                     });
                 });
             } else if (this.hasOwn(node, "obj") && !this.hasOwn(node, "mtl")) {
                 var objLoader = new THREE.OBJLoader();
                 objLoader.load(MODEL_SRC + node.obj, function (mesh) {
-                    meshAdd(mesh)
+                    meshAdd(mesh.children[0])
                 });
             }
         } else if (img_type_plane.includes(type_id)) {
@@ -103,6 +104,7 @@ export default class Topo extends Base {
             }) */
             switch (type_id) {
                 case 11:
+                 
                     // 队伍
                     this.loadImg({
                         width: 256,
@@ -133,10 +135,10 @@ export default class Topo extends Base {
                     if (info_arr.length != 5) {
                         console.warn("信息不正确", name)
                         return
-                    } 
+                    }
                     this.loadImg({
                         width: info_arr[1],
-                        height: info_arr[2] ,
+                        height: info_arr[2],
                         img: IMG_SRC + info_arr[0]
                     }, (canvas) => {
                         let routerName = new THREE.Texture(canvas);
@@ -157,9 +159,9 @@ export default class Topo extends Base {
                     })
                     if (info_arr[3] != 'false') {
                         //不需要字的地板 
-                        let [twidth, theight] = [256, 64]
-                        let color = info_arr[4] == '1' ?'#ffba47':'#0094f8'
-                        let textImg = this.loadText({ width: twidth, height: theight, text: info_arr[3], color: color})
+                        let [twidth, theight] = [info_arr[3].length*32+64, 64]
+                        let color = info_arr[4] == '1' ? '#ffba47' : '#0094f8'
+                        let textImg = this.loadText({ width: twidth, height: theight, text: info_arr[3], color: color })
 
                         let routerName = new THREE.Texture(textImg);
                         routerName.needsUpdate = true;
@@ -173,11 +175,11 @@ export default class Topo extends Base {
                             info: info
                         }
                         plane.rotation.z = Math.PI * 2;
-                        plane.rotation.x = -Math.PI /8;
+                        plane.rotation.x = -Math.PI / 8;
                         let p = (n) => {
                             return parseFloat(n)
                         }
-                        plane.position.set(x, p(y) + theight / 2, p(z) + p(info_arr[2]) / 2 +20);
+                        plane.position.set(x, p(y) + theight / 2, p(z) + p(info_arr[2]) / 2 + 20);
                         scene.add(plane);
                         this.options.data.push(plane);
                     }
@@ -222,7 +224,7 @@ export default class Topo extends Base {
     }
     clearAll() {
         this.options.data.forEach(node => {
-            this.dispose(node)
+            this.dispose(node, true)
         })
         this.options.links.forEach(link => {
             this.dispose(link)
@@ -232,7 +234,7 @@ export default class Topo extends Base {
         //更新所有节点
         let links = this.Vue.links;
         this.options.links.forEach(l => {
-            this.dispose(l)
+            this.dispose(l, true)
         })
         links.forEach(link => {
             this.addLink(link)
@@ -241,7 +243,7 @@ export default class Topo extends Base {
     deleteNode(id) {
         this.options.data.forEach(node => {
             if (node.datas.id == id) {
-                this.dispose(node)
+                this.dispose(node, true)
             }
         })
     }

@@ -61,7 +61,8 @@ export default class Topo extends Base {
     } = options) {
         /* created scene */
         let rendererOption = {
-            canvas: this.canvas
+            canvas: this.canvas,
+            antialias: true, alpha: true
         }
         let { width, height } = this.options;
         if (welgl === 2) {
@@ -75,12 +76,13 @@ export default class Topo extends Base {
         }
         this.renderer = new THREE.WebGLRenderer(rendererOption);
         //设置背景颜色 以及 大小
-        this.renderer.setClearColor(background, 1.0);
         this.renderer.setSize(width, height);
+        this.renderer.setClearAlpha(0.5);
+        // this.renderer.setClearColor(background, 1);
         //场景
         this.scene = new THREE.Scene()
         //透视相机
-        this.camera = new THREE.PerspectiveCamera(45, width / height, 1, 4000);
+        this.camera = new THREE.PerspectiveCamera(45, width / height, 1, 8000);
         //镜头位置 
         this.camera.position.set(...Object.values(cameraPosition))
         //添加
@@ -117,14 +119,41 @@ export default class Topo extends Base {
             document.querySelector("body").appendChild(this.stats.domElement)
         }
         this.animationFrame();
+        let resolution = new THREE.Vector2(window.innerWidth, window.innerHeight)
         //常用贴图  
+        var linkMesh = {
+            color: new THREE.Color("#91FFAA"),
+            opacity: 1,
+            resolution: resolution,
+            sizeAttenuation: 1,
+            lineWidth: 6,
+            near: 10,
+            far: 100000,
+        }
+
         this.Material = {
             line: new THREE.LineBasicMaterial({
-                color: 0xffffff,
+                color: 0x254968,
                 linewidth: 1,
                 linecap: 'round', //ignored by WebGLRenderer
                 linejoin: 'round' //ignored by WebGLRenderer
-            })
+            }), 
+            linne_mesh_1: new MeshLineMaterial({
+                ...linkMesh,
+                color: new THREE.Color("#91FFAA"),
+            }),
+            linne_mesh_2: new MeshLineMaterial({
+                ...linkMesh,
+                color: new THREE.Color("#fea053"),
+            }),
+            linne_mesh_3: new MeshLineMaterial({
+                ...linkMesh,
+                color: new THREE.Color("#ff3d6c"),
+            }),
+            linne_mesh_4: new MeshLineMaterial({
+                ...linkMesh,
+                color: new THREE.Color("#e17cff"),
+            }), 
         }
     }
     loadImg({ width = 256, height = 256, img }, func) {
@@ -139,6 +168,16 @@ export default class Topo extends Base {
             context.drawImage(_IMG, 0, 0, width, height);
             func(canvas)
         }
+    }
+    imgToCanvas({ width = 256, height = 256, img }) {
+        //img 转换 canvas
+        let canvas = document.createElement('canvas');
+        //导入材质
+        canvas.width = width;
+        canvas.height = height;
+        let context = canvas.getContext("2d");
+        context.drawImage(img, 0, 0, width, height);
+        return canvas
     }
     repeatLoadImg({ width = 64, height = 64, conut, img }, func) {
         let canvas = document.createElement('canvas');
@@ -156,7 +195,7 @@ export default class Topo extends Base {
             func(canvas)
         }
     }
-    loadText({ width = 256, height = 128, text = "", color ="#ffba47" }) {
+    loadText({ width = 256, height = 128, text = "", color = "#ffba47" }) {
         let canvas = document.createElement('canvas');
         //导入材质
         canvas.width = width;
@@ -171,10 +210,8 @@ export default class Topo extends Base {
         context.textBaseline = 'middle';
         context.fillStyle = '#000000';
         context.lineWidth = 20;
-        console.log(text)
         context.fillText(text, width / 2, height / 2);
         return canvas;
-
     }
     canvasItem({ width = 256, height = 256, img, x, y, z }) {
         let canvas = document.createElement('canvas');
@@ -198,14 +235,19 @@ export default class Topo extends Base {
         }
 
     }
-    dispose(mesh) {
+    dispose(mesh, state) {
         /* 删除模型 */
-        mesh.traverse(function (item) {
-            if (item instanceof THREE.Mesh) {
-                item.geometry.dispose(); //删除几何体
-                item.material.dispose(); //删除材质
-            }
-        });
+        if (!state) {
+            mesh.traverse(function (item) {
+                if (item instanceof THREE.Mesh) {
+                    item.geometry.dispose(); //删除几何体
+
+                    if (item.material) {
+                        item.material.dispose(); //删除材质
+                    }
+                }
+            });
+        }
         this.scene.remove(mesh)
     }
     click(event) {
@@ -235,6 +277,88 @@ export default class Topo extends Base {
                      break;
              } */
         }
+    }
+    addLine(src, dst, reference, index) {
+        if (!src || !dst) {
+            return
+        }
+        let p = (n) =>{
+            return parseFloat(n)
+        }
+        let _src = {
+            x: p(src[0]),
+            y: p(src[1]),
+            z: p(src[2])
+        }
+        let _dst = {
+            x: p(dst[0]),
+            y: p(dst[1]),
+            z: p(dst[2])
+        }
+
+        //线条颜色
+        let colorIndex = reference.split("-")[1];
+        // colorIndex = Math.random() < 0.2 ? '4' : colorIndex
+        let mesh_line
+        switch (colorIndex) {
+            case "1":
+                mesh_line = this.Material.linne_mesh_1
+                break
+            case "2":
+                mesh_line = this.Material.linne_mesh_2
+                break
+            case "3":
+                mesh_line = this.Material.linne_mesh_3
+                break
+            default:
+                mesh_line = this.Material.linne_mesh_4
+
+        }
+         
+        let _center = [
+            (_src.x + _dst.x) / 2,
+            (_src.y + _dst.y) / 2,
+            (_src.z + _dst.z) / 2
+        ]
+
+        let cinum = 200;
+         
+        var curve = new THREE.CatmullRomCurve3([
+            new THREE.Vector3(_src.x, _src.y, _src.z),
+            // new THREE.Vector3(_center[0], _src.y > _dst.y ? _src.y : _dst.y, _center[2]),
+            new THREE.Vector3(_dst.x, _dst.y, _dst.z),
+        ]);
+        let vector = curve.getPoints(cinum);
+        var geometry = new THREE.Geometry();
+        for (let i = 0; i < cinum; i++) {
+            geometry.vertices.push(new THREE.Vector3(...src));
+        }
+        var line = new MeshLine();
+        line.setGeometry(geometry);
+        var mesh = new THREE.Mesh(line.geometry, mesh_line);
+        mesh.frustumCulled = false;
+        mesh.params_type = "step"
+        this.scene.add(mesh);
+         
+        let n = 0;
+        let tim = setInterval(() => {
+            n++;
+            if (n >= cinum) {
+                //终点   
+                clearInterval(tim)
+            } else {
+                line.advance(vector[n]) 
+            }
+
+        })
+        //线条动画
+        /* state._animated(_src, _dst, 1500, () => {
+            line.advance(new THREE.Vector3(_src.x, _src.y, _src.z))
+            _IMG.position.set(_src.x, _src.y, _src.z)
+        }, () => {
+            state.addStep(_center, index, reference)
+            state.dispose(_IMG) 
+        }) */
     }
     animationFrame() {
         _this.stats.update()
