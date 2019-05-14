@@ -5,7 +5,7 @@ import "perfect-scrollbar/css/perfect-scrollbar.css";
 import PerfectScrollbar from 'perfect-scrollbar'
 import '../../utils/component'
 import types from '../../utils/type.json'
-import graphs from '../../json/topo1.json'
+import graphs from '../../json/topo2.json'
 
 let VM = new Vue({
     el: "#app",
@@ -456,6 +456,7 @@ let topo = new Topo({
     data: [],
     VUE: VM,
     typeMap: types,
+     deep:100,
     cameraPosition: {
         x: 300,
         y: 1800,

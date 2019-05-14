@@ -10,6 +10,7 @@ export default class Topo extends Base {
      * @controls Boolean 是否开启鼠标功能
      * @helper Boolean 是否启动辅助线
      * @cameraPosition Object 相机所在坐标
+     * @deep number 延时
      */
 
     constructor(options) {
@@ -29,6 +30,8 @@ export default class Topo extends Base {
             data: [],//存储所有添加的节点
             links: []
         }
+        this.deep = options.deep || false;
+
         /* 判断是否有canvas */
         this.canvas = document.querySelector(options.el)
         if (!this.isObject(this.canvas)) {
@@ -122,6 +125,10 @@ export default class Topo extends Base {
         this.animationFrame();
         let resolution = new THREE.Vector2(window.innerWidth, window.innerHeight)
         //常用贴图  
+        const getRandomFloat = (min, max) => (Math.random() * (max - min) + min);
+        var dashArray = 0.1
+        var dashOffset = 0
+        var dashRatio = 0.1
         var linkMesh = {
             color: new THREE.Color("#91FFAA"),
             opacity: 1,
@@ -130,6 +137,7 @@ export default class Topo extends Base {
             lineWidth: 10,
             near: 10,
             far: 100000,
+
         }
 
         this.Material = {
@@ -142,10 +150,28 @@ export default class Topo extends Base {
             linne_mesh_1: new MeshLineMaterial({
                 ...linkMesh,
                 color: new THREE.Color("#91FFAA"),
+                ...linkMesh,
+                color: new THREE.Color("#fea053"),
+                dashArray,
+                // increment him to animate the dash
+                dashOffset,
+                // 0.5 -> balancing ; 0.1 -> more line : 0.9 -> more void
+                dashRatio: getRandomFloat(0.1, 0.4),
+                // side: DoubleSide,
+                transparent: true,
+                depthWrite: false,
             }),
             linne_mesh_2: new MeshLineMaterial({
                 ...linkMesh,
                 color: new THREE.Color("#fea053"),
+                dashArray,
+                // increment him to animate the dash
+                dashOffset,
+                // 0.5 -> balancing ; 0.1 -> more line : 0.9 -> more void
+                dashRatio,
+                // side: DoubleSide,
+                transparent: true,
+                depthWrite: false,
             }),
             linne_mesh_3: new MeshLineMaterial({
                 ...linkMesh,
@@ -367,16 +393,16 @@ export default class Topo extends Base {
             geometry.vertices.push(new THREE.Vector3(...src));
         }
         var line = new MeshLine();
-        if(Math.random()>0.75){
-            line.setGeometry(geometry, function (p) { return p});
+        if (Math.random() > 0.75) {
+            line.setGeometry(geometry, function (p) { return p });
         } else if (Math.random() > 0.55) {
             line.setGeometry(geometry, function (p) { return 1 - p }); // makes width sinusoidal
         } else if (Math.random() > 0.3) {
             line.setGeometry(geometry, function (p) { return 2 + Math.cos(40 * p); }); // makes width sinusoidal
-        }else{
+        } else {
             line.setGeometry(geometry)
         }
-        
+
         var mesh = new THREE.Mesh(line.geometry, mesh_line);
         mesh.frustumCulled = false;
         mesh.params_type = "step"
@@ -470,15 +496,22 @@ export default class Topo extends Base {
     animationFrame() {
         _this.stats.update()
         _this.renderer.render(_this.scene, _this.camera);
-        requestAnimationFrame(_this.animationFrame);
+        if (typeof _this.deep == 'number') {
+            console.log(1)
+            setTimeout(() => {
+                requestAnimationFrame(_this.animationFrame);
+            }, _this.deep);
+        } else {
+            requestAnimationFrame(_this.animationFrame);
+        }
     }
-    onWindowResize( ) {
-       /*  if (typeof width !== 'number' && typeof height !== 'number') {
-            return console.warn("width or height not is number")
-        } */ 
-        _this.camera.aspect = window.innerWidth / (window.innerHeight-3);
+    onWindowResize() {
+        /*  if (typeof width !== 'number' && typeof height !== 'number') {
+             return console.warn("width or height not is number")
+         } */
+        _this.camera.aspect = window.innerWidth / (window.innerHeight - 3);
         _this.camera.updateProjectionMatrix();
-        _this.renderer.setSize(window.innerWidth,( window.innerHeight-3));
+        _this.renderer.setSize(window.innerWidth, (window.innerHeight - 3));
     }
     animated(source, target, time, func, endFunc) {
         /**
