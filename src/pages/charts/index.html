@@ -14,13 +14,104 @@
 	<script type="text/javascript" src="./assets/js/Stats.js"></script>
 	<script type="text/javascript" src="./assets/js/tween.js"></script>
 	<script type="text/javascript" src="./assets/js/THREE.MeshLine.js"></script>
+	
 
 	<link rel="stylesheet" href="./assets/styles/reset.css">
 	<link rel="stylesheet" href="./assets/styles/animate.css">
 
 	<script type="text/x-template" id="item-template">
-		<!-- 组件 -->
-		<div style="color:#fff">测试</div>
+		<!-- 组件 左侧柱状图 -->
+		<div class="l_chart">
+			<p>攻击队伍TOP5</p>
+			<ul>
+				<li v-for="(item,index) in attackList" :key="index">
+					<i></i>
+					<p>{{item.name}}</p>
+					<div>
+						<span :style="'width:'+item.value/maxValue*100+'%;'" class="_bar"></span>
+						<span class="bar_value">{{item.value}}</span>
+					</div>
+					
+				</li>
+			</ul>
+		</div>
+	</script>
+
+
+	<script type="text/x-template" id="item-template1">
+		<!-- 组件 右侧柱状图 -->
+		<div class="r_chart">
+			<p>攻击类型TOP5</p>
+			<ul>
+				<li v-for="(item,index) in attackList" :key="index">
+					<i></i>
+					<p>{{item.name}}</p>
+					<div>
+						<span class="bar_value">{{item.value}}</span>
+						<span :style="'width:'+item.value/maxValue*100+'%;'" class="_bar"></span>
+					</div>
+					
+				</li>
+			</ul>
+		</div>
+	</script>
+
+
+	<script type="text/x-template" id="item-template2">
+		<!-- 组件 顶部队伍列表-->
+		<div class="rank_group">
+			<div class="rank_item" @click="rankShow=!rankShow">
+				<span>
+					<!-- <img src="../../assets/image/4.png"> -->
+				</span>
+				<div>
+					<span class="_code">{{rankData.code}}</span>
+					<span class="_name">{{rankData.name}}</span>
+				</div>
+			</div>
+			<div class="rank_list" v-if="rankShow">
+				<ul>
+					<li v-for="(item,index) in rankList" :class="index==iconIndex?'rankActive':''" @click="iconIndex=index">
+						<img :src="item.icon">
+					</li>
+				</ul>
+			</div>
+		</div>
+	</script>
+	<script type="text/x-template" id="item-template3">
+		<!-- 组件 左侧威胁列表-->
+		<div class="threat_list"  radomId="scroll_content">
+			<p>威胁列表</p>
+			<ul>
+				<li v-for="(item,index) in dataList" :key="item.id" class="threat_item" :class="threatIndex==index?'activeList':''" @click="getThreat(index)">
+					<span class="_time">{{item.time}}</span>
+					<span class="_name">{{item.name}}</span>
+					<i v-if="threatIndex!=index"></i>
+				</li>
+			</ul>
+		</div>
+	</script>
+	<script type="text/x-template" id="item-template4">
+		<!-- 组件 右侧威胁步骤-->
+		<div class="step_list"  radomId="scroll_content">
+			<p>威胁步骤</p>
+			<ul>
+				<li v-for="(item,index) in stepList" :key="item.id" class="step_item" :class="stepIndex==index?'activeStep':''" @click="stepIndex=index">
+					<span class="_num">{{index+1}}</span>
+					<span class="_icon"><img src="../../assets/image/chart/4.png"></span>
+					<span class="_step">{{item.stepname}}</span>
+				</li>
+			</ul>
+		</div>
+	</script>
+	<script type="text/x-template" id="item-template5">
+		<div class="all_view">
+			<i></i>
+			<span>全局视角</span>
+			<div>
+				全局场景置放
+			</div>
+		</div>
 	</script>
 
 	<style>
@@ -36,9 +127,44 @@
 
 <body>
 	<div id="app">
-		<chart-item></chart-item>
-	</div>
+		<div class="_header">
+			<div>
+				<span class="c_headname">第二届“强网”拟态防御国际精英挑战赛</span>
+				<span class="e_headname">THE 2nd "QIANGWANG" INTERNATIONAL ELITE CHALLENGE ON CYBER MIMIC DEFENSE</span>
+			</div>
+		</div>
+		<div class="_content">
+			<!-- 页面1柱状图 -->
+			<!-- <div class="chart_Group pos_left">
+				<div class="l_group">
+					<l-chart></l-chart>
+					<l-chart></l-chart>
+				</div>
+				
+			</div>
+			<div class="chart_Group pos_right">
+				<div class="r_group">
+					<r-chart></r-chart>
+					<r-chart></r-chart>
+				</div>
+			</div> -->
 
+
+			<!-- 页面2 队伍选择 -->
+			<div class="list_Group">
+				<t-rank></t-rank>
+			</div> 
+			<div class="list_Group">
+				<l-list></l-list>
+			</div>
+			<div class="list_Step">
+				<r-step></r-step>
+			</div>
+			<b-view></b-view>
+
+		</div>
+		
+	</div>
 </body>
 
 </html>
