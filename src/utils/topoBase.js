@@ -50,6 +50,7 @@ export default class Topo extends Base {
                 this.canvas.addEventListener("mouseup", this.click)
             }
         }
+        window.addEventListener("resize", this.onWindowResize)
     }
     _init({
         welgl = 1,
@@ -65,15 +66,15 @@ export default class Topo extends Base {
             antialias: true, alpha: true
         }
         let { width, height } = this.options;
-        if (welgl === 2) {
-            /* 如果使用webgl2 */
-            if (WEBGL.isWebGL2Available() == false) {
-                document.body.appendChild(WEBGL.getWebGL2ErrorMessage());
-            } else {
-                var context = this.canvas.getContext('webgl2');
-                rendererOption.context = context;
-            }
-        }
+        // if (welgl === 2) {
+        //     /* 如果使用webgl2 */
+        //     if (WEBGL.isWebGL2Available() == false) {
+        //         document.body.appendChild(WEBGL.getWebGL2ErrorMessage());
+        //     } else {
+        //         var context = this.canvas.getContext('webgl2');
+        //         rendererOption.context = context;
+        //     }
+        // }
         this.renderer = new THREE.WebGLRenderer(rendererOption);
         //设置背景颜色 以及 大小
         this.renderer.setSize(width, height);
@@ -126,7 +127,7 @@ export default class Topo extends Base {
             opacity: 1,
             resolution: resolution,
             sizeAttenuation: 1,
-            lineWidth: 6,
+            lineWidth: 10,
             near: 10,
             far: 100000,
         }
@@ -137,7 +138,7 @@ export default class Topo extends Base {
                 linewidth: 1,
                 linecap: 'round', //ignored by WebGLRenderer
                 linejoin: 'round' //ignored by WebGLRenderer
-            }), 
+            }),
             linne_mesh_1: new MeshLineMaterial({
                 ...linkMesh,
                 color: new THREE.Color("#91FFAA"),
@@ -153,7 +154,7 @@ export default class Topo extends Base {
             linne_mesh_4: new MeshLineMaterial({
                 ...linkMesh,
                 color: new THREE.Color("#e17cff"),
-            }), 
+            }),
         }
     }
     loadImg({ width = 256, height = 256, img }, func) {
@@ -173,10 +174,10 @@ export default class Topo extends Base {
         //img 转换 canvas
         let canvas = document.createElement('canvas');
         //导入材质
-        canvas.width = width;
-        canvas.height = height;
+        canvas.width = width / 3;
+        canvas.height = height / 3;
         let context = canvas.getContext("2d");
-        context.drawImage(img, 0, 0, width, height);
+        context.drawImage(img, 0, 0, width / 3, height / 3);
         return canvas
     }
     repeatLoadImg({ width = 64, height = 64, conut, img }, func) {
@@ -222,7 +223,6 @@ export default class Topo extends Base {
         let _IMG = new Image();
         _IMG.src = img;
         _IMG.onload = () => {
-            console.log("cs")
             context.drawImage(_IMG, 0, 0, width, height);
             let routerName = new THREE.Texture(canvas);
             routerName.needsUpdate = true;
@@ -247,6 +247,8 @@ export default class Topo extends Base {
                     }
                 }
             });
+        } else {
+
         }
         this.scene.remove(mesh)
     }
@@ -278,11 +280,42 @@ export default class Topo extends Base {
              } */
         }
     }
-    addLine(src, dst, reference, index) {
+    strToNumbern(num) {
+        return parseFloat(num)
+    }
+    addLine1(line) {
+        for (let key in line) {
+            line[key].x = parseFloat(line[key].x)
+            line[key].y = parseFloat(line[key].y)
+            line[key].z = parseFloat(line[key].z)
+        }
+        var curve = new THREE.SplineCurve3([
+            new THREE.Vector3(0, 0, 10),
+            new THREE.Vector3(100 / 2, 40, 180 / 2),
+            new THREE.Vector3(100, 0, 180),
+        ]);
+        var geometry = new THREE.Geometry();
+        geometry.vertices = curve.getPoints(50);
+        var material = new THREE.LineBasicMaterial({ color: 0xff0000 });
+        var line = new THREE.Line(geometry, material);
+        this.scene.add(line)
+        /* var geometry = new THREE.Geometry();
+        for (let i = 0; i < cinum; i++) {
+            geometry.vertices.push(new THREE.Vector3(...src));
+        }
+        var line = new MeshLine();
+        line.setGeometry(geometry);
+        var mesh = new THREE.Mesh(line.geometry, mesh_line);
+        mesh.frustumCulled = false;
+        mesh.params_type = "step"
+        this.scene.add(mesh); */
+
+    }
+    addLine(src, dst, reference, end) {
         if (!src || !dst) {
             return
         }
-        let p = (n) =>{
+        let p = (n) => {
             return parseFloat(n)
         }
         let _src = {
@@ -314,18 +347,18 @@ export default class Topo extends Base {
                 mesh_line = this.Material.linne_mesh_4
 
         }
-         
+
         let _center = [
             (_src.x + _dst.x) / 2,
             (_src.y + _dst.y) / 2,
             (_src.z + _dst.z) / 2
         ]
 
-        let cinum = 200;
-         
+        let cinum = 80;
+
         var curve = new THREE.CatmullRomCurve3([
             new THREE.Vector3(_src.x, _src.y, _src.z),
-            // new THREE.Vector3(_center[0], _src.y > _dst.y ? _src.y : _dst.y, _center[2]),
+            new THREE.Vector3(_center[0], 200, _center[2]),
             new THREE.Vector3(_dst.x, _dst.y, _dst.z),
         ]);
         let vector = curve.getPoints(cinum);
@@ -334,30 +367,104 @@ export default class Topo extends Base {
             geometry.vertices.push(new THREE.Vector3(...src));
         }
         var line = new MeshLine();
-        line.setGeometry(geometry);
+        if(Math.random()>0.75){
+            line.setGeometry(geometry, function (p) { return p});
+        } else if (Math.random() > 0.55) {
+            line.setGeometry(geometry, function (p) { return 1 - p }); // makes width sinusoidal
+        } else if (Math.random() > 0.3) {
+            line.setGeometry(geometry, function (p) { return 2 + Math.cos(40 * p); }); // makes width sinusoidal
+        }else{
+            line.setGeometry(geometry)
+        }
+        
         var mesh = new THREE.Mesh(line.geometry, mesh_line);
         mesh.frustumCulled = false;
         mesh.params_type = "step"
         this.scene.add(mesh);
-         
-        let n = 0;
-        let tim = setInterval(() => {
-            n++;
-            if (n >= cinum) {
-                //终点   
-                clearInterval(tim)
-            } else {
-                line.advance(vector[n]) 
-            }
 
-        })
+        let n = 0;
+        console.time()
+        /*  let tim = setInterval(() => {
+             n++;
+             if (n >= cinum) {
+                 //终点   
+                 clearInterval(tim)
+                 
+                 setTimeout(() => {
+                     this.dispose(mesh)
+                     vector = null;
+                     cinum = null;
+                     curve = null;
+                     geometry = null;
+                     line = null;
+                     _center = null;
+                     mesh_line = null;
+                     tim = null;
+                     mesh = null;
+                     n = null; 
+                 }, 5000)
+             } else {
+                 line.advance(vector[n])
+             }
+ 
+         }, 5) */
         //线条动画
-        /* state._animated(_src, _dst, 1500, () => {
-            line.advance(new THREE.Vector3(_src.x, _src.y, _src.z))
-            _IMG.position.set(_src.x, _src.y, _src.z)
+        var interval = (n) => {
+            if (n >= cinum) {
+
+                console.timeEnd()
+                let t = setInterval(() => {
+                    n--;
+                    if (n < 0) {
+                        typeof end == "function" ? end() : ""
+                        deleteMesh()
+                        clearInterval(t)
+                    } else {
+                        line.advance(vector[cinum - 1])
+                    }
+                })
+                return
+            } else {
+                n++
+                setTimeout(() => {
+                    line.advance(vector[parseInt(n)])
+                    interval(n)
+                }, 1500 / cinum);
+            }
+        }
+        interval(n)
+        var deleteMesh = () => {
+            this.dispose(mesh)
+            vector = null;
+            cinum = null;
+            curve = null;
+            geometry = null;
+            line = null;
+            _center = null;
+            mesh_line = null;
+            mesh = null;
+            n = null;
+        }
+        /* let p1 = { i: 0 }
+        let p2 = { i: 300 }
+        console.log(vector[0])
+        this.animated(p1, p2, 3000, () => { 
+            line.advance(vector[parseInt(p1.i)])
         }, () => {
-            state.addStep(_center, index, reference)
-            state.dispose(_IMG) 
+            // this.addStep(_center, index, reference) 
+            setTimeout(()=>{
+                vector = null;
+                cinum = null;
+                curve = null;
+                geometry = null;
+                line = null;
+                _center = null;
+                mesh_line = null;
+                this.dispose(mesh)
+                mesh = null;
+                n = null;
+                console.timeEnd()
+            },2000)
         }) */
     }
     animationFrame() {
@@ -365,13 +472,13 @@ export default class Topo extends Base {
         _this.renderer.render(_this.scene, _this.camera);
         requestAnimationFrame(_this.animationFrame);
     }
-    onWindowResize({ width, height }) {
-        if (typeof width !== 'number' && typeof height !== 'number') {
+    onWindowResize( ) {
+       /*  if (typeof width !== 'number' && typeof height !== 'number') {
             return console.warn("width or height not is number")
-        }
-        this.camera.aspect = width / height;
-        this.camera.updateProjectionMatrix();
-        this.renderer.setSize(width, height);
+        } */ 
+        _this.camera.aspect = window.innerWidth / (window.innerHeight-3);
+        _this.camera.updateProjectionMatrix();
+        _this.renderer.setSize(window.innerWidth,( window.innerHeight-3));
     }
     animated(source, target, time, func, endFunc) {
         /**

@@ -47,12 +47,17 @@ export default class Topo extends Base {
          }) */
 
     }
+    addUnitFoot(node) {
+        //攻击
+
+    }
     loadGraph(datas) {
         let all_obj = Object.assign({})
         let loadObj = this.typeMap.filter(t => obj_arr.includes(parseInt(t.type)))
         let count = 0;
         let { nodes, links } = datas;
         let scene = this.scene;
+        let selectTeam = null;//选择的队伍
         /* 加载obj */
         let load = (data) => {
             //所有模型加载完毕
@@ -65,14 +70,33 @@ export default class Topo extends Base {
                     let mesh = data[`obj_${node.type}`].clone()
                     mesh.position.set(node.x, node.y, node.z)
                     group.add(mesh)
+                    if(node.type==1&&node.z<0){
+                        mesh.rotation.y = Math.PI
+                    }
+                }
+                if (selectTeam==null&&node.type==9){
+                    selectTeam=node
                 }
                 n_index++;
             }
-            scene.add(group);
+            scene.add(group); 
+            //选中 
 
+           console.log(selectTeam)
+            this.Vue.addNode({
+                x: selectTeam.x,
+                y: "0",
+                z: 722,
+                name: "队伍",
+                type: "12",
+                id: this.Vue.max_id++,
+                info: "fenzu6.png,130,310,false,1",
+            })
+          
+            
+          
         }
-        //获取节点中所有需要加载的obj与mtl;
-        var geometry = new THREE.Geometry()
+        //获取节点中所有需要加载的obj与mtl; 
         loadObj.forEach((node, index) => {
             var mtlLoader = new THREE.MTLLoader();
             mtlLoader.load(MODEL_SRC + node.mtl, function (materials) {
@@ -260,25 +284,28 @@ export default class Topo extends Base {
             this.addLink(link)
         })
         //测试连线 
+        let num = 0
+         let time = setInterval(() => { 
+             if (num >= links.length - 1) {
+                 num = 0
+             }
+             num++
+             let l = links[num] 
+             this.addLine([l.src.x, l.src.y, l.src.z], [l.dst.x, l.dst.y, -l.dst.z], '1-3-3')
+             
+         },300) 
        /*  let num = 0
-        let time = setInterval(() => { 
-            if (num >= 5) {
-                clearInterval(time)
+        let showLine = ()=>{
+            if (num >= links.length-1){
+                num=0
             }
-            let l = links[num]
-
-            this.addLine1(l)
             num++
-        }, 3000) */
-       let num = 0
-          let time = setInterval(() => { 
-              if (num >= links.length) {
-                  clearInterval(time)
-              }
-              let l = links[num] 
-              this.addLine([l.src.x, l.src.y, l.src.z], [l.dst.x, l.dst.y, -l.dst.z], '1-3-3')
-              num++
-          }, 3000)   
+            let l = links[num]
+            this.addLine([l.src.x, l.src.y, l.src.z], [l.dst.x, l.dst.y, -l.dst.z], '1-3-3',function(){
+                showLine() 
+            })
+        }
+        showLine() */
         // scene.add(new THREE.Mesh(geometry, material));
     }
     addTitle(node) {
@@ -305,7 +332,6 @@ export default class Topo extends Base {
         plane.position.set(node.x, p(node.y) + theight / 2, p(node.z) + p(info_arr[2]) / 2 + 30);
         this.scene.add(plane);
     }
-    
     addNodes({ type, name, x = 0, y = 0, z = 0, id, info }) {
         if (type === "" || name === "") {
             alert("类型或者名字不能为空")
@@ -467,7 +493,7 @@ export default class Topo extends Base {
         }
         this.options.data.push(cubew)
         this.scene.add(cube); */
-        this.updataLink()
+        // this.updataLink()
     }
     addLink(item) {
         //添加连线 

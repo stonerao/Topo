@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>网络安全威胁回放</title>
+	<script type="text/javascript" src="./assets/js/three.min.js"></script>
+	<!-- <script type="text/javascript" src="./assets/js/WebGL.js"></script> -->
+	<script type="text/javascript" src="./assets/js/OrbitControls.js"></script>
+	<script type="text/javascript" src="./assets/js/ColladaLoader.js"></script>
+	<script type="text/javascript" src="./assets/js/MTLLoader.js"></script>
+	<script type="text/javascript" src="./assets/js/OBJLoader.js"></script>
+	<script type="text/javascript" src="./assets/js/Stats.js"></script>
+	<script type="text/javascript" src="./assets/js/tween.js"></script>
+	<script type="text/javascript" src="./assets/js/THREE.MeshLine.js"></script>
+
+	<link rel="stylesheet" href="./assets/styles/reset.css">
+	<link rel="stylesheet" href="./assets/styles/animate.css">
+	<script type="text/x-template" id="item-template">
+		<ul> 
+			<li>
+				<span @click="cnode(items)" class="cnode">
+					{{items.name}}   
+				</span> 
+				<span class="icon-tree" @click="add(items)">+</span>
+				<span class="icon-tree" @click="del(items)">-</span>
+				<tree-item 
+					@itemdeleteode="itemdeleteode"
+					@itemaddnode="itemaddnode"
+					@clicknode="clcikNode" 
+					class="item" v-for="(item,index) in items.children"  :key="index" :items="item"></tree-item>
+			</li>
+		</ul>
+	</script>
+	<style>
+		.ifram {
+			position: absolute;
+			right: 0;
+			bottom: 0;
+		}
+	</style>
+	<script>
+		/* window.onload = function () {
+			let dom = document.getElementById("IFRAM")
+			setTimeout(() => {
+				dom.width = window.innerWidth;
+				dom.height = window.innerHeight;
+				dom.style.top = 0;
+
+			}, 10000)
+			dom.onclick = function () {
+				console.log(1)
+			}
+		} */
+	</script>
+</head>
+
+<body>
+	<div id="app">
+		<!-- <iframe class="ifram" id="IFRAM" src="/global.html" width="300" height="300px" frameborder="0"></iframe> -->
+		<canvas style="width:1000px;height:800px" id="canvas"></canvas>
+	</div>
+
+</body>
+
+</html>

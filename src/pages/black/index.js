@@ -1,11 +1,11 @@
 import "./index.less";
-import Topo from "../../utils/graph/global"
+import Topo from "../../utils/graph/black"
 import Vue from 'vue/dist/vue.js'
 import "perfect-scrollbar/css/perfect-scrollbar.css";
 import PerfectScrollbar from 'perfect-scrollbar'
 import '../../utils/component'
 import types from '../../utils/type.json'
-import graphs from '../../json/topo1.json'
+import graphs from '../../json/topo2.json'
 
 let VM = new Vue({
     el: "#app",
@@ -39,8 +39,7 @@ let VM = new Vue({
     created() {
 
     },
-    
-    mounted() {  
+    mounted() {
         /* this.node = {
             x: 0,
             y: 0,
