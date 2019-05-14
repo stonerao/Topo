@@ -83,8 +83,8 @@ export default class Topo extends Base {
                     count++
                     all_obj[`obj_${node.type}`] = mesh.children[0];
                     if (count == loadObj.length) {
-                        load(all_obj)
-
+                        load(all_obj) 
+                       
                     }
                 });
             });

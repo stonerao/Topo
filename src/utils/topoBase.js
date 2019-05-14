@@ -496,8 +496,7 @@ export default class Topo extends Base {
     animationFrame() {
         _this.stats.update()
         _this.renderer.render(_this.scene, _this.camera);
-        if (typeof _this.deep == 'number') {
-            console.log(1)
+        if (typeof _this.deep == 'number') { 
             setTimeout(() => {
                 requestAnimationFrame(_this.animationFrame);
             }, _this.deep);

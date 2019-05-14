@@ -6,6 +6,7 @@ import PerfectScrollbar from 'perfect-scrollbar'
 import '../../utils/component'
 import types from '../../utils/type.json'
 import graphs from '../../json/topo2.json'
+import axios from '../../utils/axios'
 
 let VM = new Vue({
     el: "#app",
@@ -33,11 +34,12 @@ let VM = new Vue({
             itemAdd: null,
             links: [],//连线
             inp_img: "",
-            dsc: "队伍直接图片名，地板=图片名,width,height"
+            dsc: "队伍直接图片名，地板=图片名,width,height",
+            graph:{}
         }
     },
     created() {
-
+        axios("")
     },
     mounted() {
         /* this.node = {

@@ -6,8 +6,6 @@ import PerfectScrollbar from 'perfect-scrollbar'
 import '../../utils/component'
 import types from '../../utils/type.json'
 import graphs from '../../json/topo2.json'
-import axios from '../../utils/axios'
-import GetRequest from '../../utils/full'
 
 let VM = new Vue({
     el: "#app",
@@ -39,10 +37,10 @@ let VM = new Vue({
         }
     },
     created() {
-        this.get(1)
-    },
 
-    mounted() {
+    },
+    
+    mounted() {  
         /* this.node = {
             x: 0,
             y: 0,
@@ -75,45 +73,45 @@ let VM = new Vue({
          this.nodes = graphs.nodes;
          this.links = graphs.links;
          this.save() */
-        /*  var graphs = JSON.parse(this.getSaveData())
-         let nodes = graphs.nodes;
-         let links = graphs.links;
-         let get = (data) => {
-             data.forEach(node => {
-                 if (node.type == 11) {
-                     console.log(node)
-                     node.children.forEach((x, i) => {
-                         x.x = parseInt(node.x) + i * 30 - 40
-                         x.z = parseInt(node.z) + 80,
-                             x.y = node.y
-                     })
-                 }
-                 //    links.forEach(x => {
-                 //         if (node.id == x.src.id) {
-                 //             x.src.x = node.x
-                 //             x.src.y = node.y
-                 //             x.src.z = node.z
-                 //         }
-                 //         if (node.id == x.dst.id) {
-                 //             x.dst.x = node.x
-                 //             x.dst.y = node.y
-                 //             x.dst.z = node.z
-                 //         }
-                 //     }) 
-                 if (node.children.length > 0 && Array.isArray(node.children)) {
-                     get(node.children)
-                 }
-             })
-         }
-         get(nodes)
-         let n = this.linksHui(graphs)
-         this.links = n.links;
-         this.nodes = n.nodes;
-         this.save() */
-
-        // window.localStorage.setItem("graph", JSON.stringify(graphs))
+       /*  var graphs = JSON.parse(this.getSaveData())
+        let nodes = graphs.nodes;
+        let links = graphs.links;
+        let get = (data) => {
+            data.forEach(node => {
+                if (node.type == 11) {
+                    console.log(node)
+                    node.children.forEach((x, i) => {
+                        x.x = parseInt(node.x) + i * 30 - 40
+                        x.z = parseInt(node.z) + 80,
+                            x.y = node.y
+                    })
+                }
+                //    links.forEach(x => {
+                //         if (node.id == x.src.id) {
+                //             x.src.x = node.x
+                //             x.src.y = node.y
+                //             x.src.z = node.z
+                //         }
+                //         if (node.id == x.dst.id) {
+                //             x.dst.x = node.x
+                //             x.dst.y = node.y
+                //             x.dst.z = node.z
+                //         }
+                //     }) 
+                if (node.children.length > 0 && Array.isArray(node.children)) {
+                    get(node.children)
+                }
+            })
+        }
+        get(nodes)
+        let n = this.linksHui(graphs)
+        this.links = n.links;
+        this.nodes = n.nodes;
+        this.save() */
+   
+        window.localStorage.setItem("graph", JSON.stringify(graphs))
         setTimeout(() => {
-            // this.restore()   
+            this.restore()   
             /*       this.node = {
                       x: "100",
                       y: "0",
@@ -145,27 +143,9 @@ let VM = new Vue({
               get(nodes) */
 
         }, 3000)
-        
 
     },
     methods: {
-        get(id) {
-            axios("/mimic/topology/get", {
-                params: {
-                    id: id
-                }
-            }).then(res => {
-                let { nodes, links } = res.topology;
-                topo.loadGraph({
-                    nodes: this.returnNode(nodes),
-                    links: links
-                })
-            })
-        },
-        objLoad(){
-            //所有图形加载完毕
-            this.get()
-        },
         linksHui(graphs) {
             let nodes = graphs.nodes;
             let links = graphs.links;
@@ -431,7 +411,7 @@ let VM = new Vue({
             let data = JSON.stringify({
                 nodes: this.nodes,
                 links: this.links
-            })
+            }) 
             window.localStorage.setItem("graph", data)
         },
         getSaveData() {
@@ -476,7 +456,7 @@ let topo = new Topo({
     data: [],
     VUE: VM,
     typeMap: types,
-    deep: 100,
+     deep:100,
     cameraPosition: {
         x: 300,
         y: 1800,

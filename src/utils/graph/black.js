@@ -293,7 +293,7 @@ export default class Topo extends Base {
              let l = links[num] 
              this.addLine([l.src.x, l.src.y, l.src.z], [l.dst.x, l.dst.y, -l.dst.z], `1-${num%4}-3`)
              
-         },300) 
+         },2000) 
        /*  let num = 0
         let showLine = ()=>{
             if (num >= links.length-1){
