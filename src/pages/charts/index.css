@@ -185,13 +185,13 @@ span.active {
   right: 20px;
   bottom: 0;
 }
-._content .chart_Group .l_chart {
+._content .l_chart {
   margin-bottom: 50px;
 }
-._content .chart_Group .l_chart:last-child {
+._content .l_chart:last-child {
   margin-bottom: 0;
 }
-._content .chart_Group .l_chart > p {
+._content .l_chart > p {
   height: 33px;
   font-size: 22px;
   font-family: HelveticaNeue-Bold;
@@ -202,14 +202,14 @@ span.active {
   margin-bottom: 10px;
   white-space: nowrap;
 }
-._content .chart_Group .l_chart > ul li {
+._content .l_chart > ul li {
   padding: 0 15px;
   position: relative;
   white-space: nowrap;
   list-style: none;
   margin-bottom: 10px;
 }
-._content .chart_Group .l_chart > ul li > i {
+._content .l_chart > ul li > i {
   display: block;
   width: 5px;
   height: 26px;
@@ -219,7 +219,7 @@ span.active {
   bottom: 0px;
   background-image: url(../../assets/image/chart/24.png);
 }
-._content .chart_Group .l_chart > ul li > div {
+._content .l_chart > ul li > div {
   width: 196px;
   height: 23px;
   background-image: url(../../assets/image/chart/22.png);
@@ -228,13 +228,13 @@ span.active {
   background-position: center;
   background-size: 100%;
 }
-._content .chart_Group .l_chart > ul li > div .bar_value {
+._content .l_chart > ul li > div .bar_value {
   line-height: 23px;
   padding-left: 5px;
   color: #fff;
   font-size: 13px;
 }
-._content .chart_Group .l_chart > ul li > div .bar_name {
+._content .l_chart > ul li > div .bar_name {
   position: absolute;
   width: 100%;
   right: 0;
@@ -246,10 +246,12 @@ span.active {
   text-align: right;
   padding-right: 20px;
 }
-._content .chart_Group .r_chart {
+._content .r_chart {
   margin-top: 50px;
+  width: 216px;
+  float: right;
 }
-._content .chart_Group .r_chart > p {
+._content .r_chart > p {
   height: 33px;
   font-size: 22px;
   font-family: HelveticaNeue-Bold;
@@ -261,14 +263,14 @@ span.active {
   white-space: nowrap;
   text-align: right;
 }
-._content .chart_Group .r_chart > ul li {
+._content .r_chart > ul li {
   padding-right: 15px;
   position: relative;
   white-space: nowrap;
   list-style: none;
   margin-bottom: 10px;
 }
-._content .chart_Group .r_chart > ul li > i {
+._content .r_chart > ul li > i {
   display: block;
   width: 5px;
   height: 26px;
@@ -278,7 +280,7 @@ span.active {
   bottom: 0px;
   background-image: url(../../assets/image/chart/25.png);
 }
-._content .chart_Group .r_chart > ul li > div {
+._content .r_chart > ul li > div {
   width: 196px;
   height: 23px;
   background-image: url(../../assets/image/chart/23.png);
@@ -289,7 +291,7 @@ span.active {
   background-position: center;
   background-size: 100%;
 }
-._content .chart_Group .r_chart > ul li > div .bar_value {
+._content .r_chart > ul li > div .bar_value {
   display: inline-block;
   line-height: 23px;
   padding-right: 5px;
@@ -297,7 +299,7 @@ span.active {
   font-size: 13px;
   float: right;
 }
-._content .chart_Group .r_chart > ul li > div .bar_name {
+._content .r_chart > ul li > div .bar_name {
   position: absolute;
   width: 100%;
   line-height: 23px;
@@ -642,13 +644,14 @@ span.active {
 ._content .a_statistics > p {
   height: 33px;
   font-size: 22px;
-  font-family: PingFangSC-Semibold;
-  font-weight: 600;
+  font-family: HelveticaNeue-Bold;
+  font-weight: bold;
   color: #ffffff;
-  line-height: 33px;
+  line-height: 29px;
   text-shadow: 1px 1px 4px #0064ff;
+  margin-bottom: 10px;
+  white-space: nowrap;
   text-align: right;
-  margin-bottom: 30px;
 }
 ._content .a_statistics .a_circle {
   width: 80px;
@@ -707,13 +710,14 @@ span.active {
 ._content .High_risk > p {
   height: 33px;
   font-size: 22px;
-  font-family: PingFangSC-Semibold;
-  font-weight: 600;
+  font-family: HelveticaNeue-Bold;
+  font-weight: bold;
   color: #ffffff;
-  line-height: 33px;
+  line-height: 29px;
   text-shadow: 1px 1px 4px #0064ff;
+  margin-bottom: 10px;
+  white-space: nowrap;
   text-align: right;
-  margin-bottom: 30px;
 }
 ._content .High_risk .a_circle {
   width: 80px;
@@ -787,13 +791,14 @@ span.active {
 ._content .Middle_risk > p {
   height: 33px;
   font-size: 22px;
-  font-family: PingFangSC-Semibold;
-  font-weight: 600;
+  font-family: HelveticaNeue-Bold;
+  font-weight: bold;
   color: #ffffff;
-  line-height: 33px;
+  line-height: 29px;
   text-shadow: 1px 1px 4px #0064ff;
+  margin-bottom: 10px;
+  white-space: nowrap;
   text-align: right;
-  margin-bottom: 30px;
 }
 ._content .Middle_risk .a_circle {
   width: 80px;
@@ -866,13 +871,14 @@ span.active {
 ._content .Low_risk > p {
   height: 33px;
   font-size: 22px;
-  font-family: PingFangSC-Semibold;
-  font-weight: 600;
+  font-family: HelveticaNeue-Bold;
+  font-weight: bold;
   color: #ffffff;
-  line-height: 33px;
+  line-height: 29px;
   text-shadow: 1px 1px 4px #0064ff;
+  margin-bottom: 10px;
+  white-space: nowrap;
   text-align: right;
-  margin-bottom: 30px;
 }
 ._content .Low_risk .a_circle {
   width: 80px;
