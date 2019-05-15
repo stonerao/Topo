@@ -35,7 +35,10 @@ let VM = new Vue({
             itemAdd: null,
             links: [],//连线
             inp_img: "",
-            dsc: "队伍直接图片名，地板=图片名,width,height"
+            dsc: "队伍直接图片名，地板=图片名,width,height",
+            soketInterVal: null,
+            onloadNum: 0,
+            graphs: {}
         }
     },
     created() {
@@ -145,7 +148,7 @@ let VM = new Vue({
               get(nodes) */
 
         }, 3000)
-        
+
 
     },
     methods: {
@@ -156,13 +159,71 @@ let VM = new Vue({
                 }
             }).then(res => {
                 let { nodes, links } = res.topology;
+                this.graphs = res.topology;
+                this.nodes = this.returnNode(nodes)
                 topo.loadGraph({
-                    nodes: this.returnNode(nodes),
+                    nodes: this.nodes,
                     links: links
                 })
             })
         },
-        objLoad(){
+        onload() {
+            console.log(this.onloadNum)
+            if (this.onloadNum == 2) {
+                //全部加载完成
+                this.socket()
+            }
+        },
+        socket(func) {
+
+            this.ws = new WebSocket(`ws://172.18.0.23/mimic/websocket/global`);
+            this.ws.onopen = () => {
+                // this.ws.send(JSON.stringify({ "unitId": this.unitId.toString() }))
+                // // typeof func == 'function' ? func() : '';
+            };
+            this.ws.onmessage = e => {
+                let data = JSON.parse(e.data)
+                //  str = {"levelTop":[{"name":"3","value":928},{"name":"2","value":0},{"name":"1","value":0}],"path":[{"start":"130","end":"13"},{"start":"102","end":"13"},{"start":"71","end":"10"},{"start":"112","end":"13"},{"start":"144","end":"10"}],"srcTop":[{"name":"team12","value":19},{"name":"team5","value":17},{"name":"team4","value":17},{"name":"team1","value":16},{"name":"team13","value":15}],"typeTop":[{"name":"web扫描","value":353}],"dstTop":[{"name":"白盒拟态路由器","value":193},{"name":"白盒拟态WEB服务器","value":160}]}
+                let { path, srcTop, dstTop, levelTop, typeTop } = data;
+                console.log(path)
+                console.log(this.nodes)
+                let arr = []
+                path.forEach(x => {
+                    let index = 0;
+                    let obj = {} 
+                    while (index < this.nodes.length) {
+                        let node = this.nodes[index];
+                        if (x.start == node.id) {
+                            obj.src = node;
+                        }
+                        if (x.end == node.id) {
+                            obj.dst = node;
+                        }
+                        
+                        index++;
+                    } 
+                    if (obj.hasOwnProperty("src") && obj.hasOwnProperty("dst")) {
+                        // arr.push(obj)
+                        topo.addLine([obj.src.x, obj.src.y, obj.src.z], [obj.dst.x, obj.dst.y, obj.dst.z], '2-' + path.length%4+'-3')
+                    }
+                }) 
+                
+                console.log(arr)
+            }
+            this.ws.onerror = e => { };
+            this.ws.onclose = () => {
+                //通道关闭了
+                if (this.ws.readyState == 3) {
+                    //五秒钟后重连
+                    setTimeout(() => {
+                        this.socket();
+                        // this.socket(func());
+                    }, 5000)
+                }
+            };
+        },
+
+        objLoad() {
             //所有图形加载完毕
             this.get()
         },
@@ -476,7 +537,7 @@ let topo = new Topo({
     data: [],
     VUE: VM,
     typeMap: types,
-    deep: 100,
+    // deep: 100,
     cameraPosition: {
         x: 300,
         y: 1800,

@@ -75,16 +75,17 @@ export default class Topo extends Base {
         var geometry = new THREE.Geometry()
         loadObj.forEach((node, index) => {
             var mtlLoader = new THREE.MTLLoader();
-            mtlLoader.load(MODEL_SRC + node.mtl, function (materials) {
+            mtlLoader.load(MODEL_SRC + node.mtl, (materials) => {
                 materials.preload();
                 var objLoader = new THREE.OBJLoader();
                 objLoader.setMaterials(materials);
-                objLoader.load(MODEL_SRC + node.obj, function (mesh) {
+                objLoader.load(MODEL_SRC + node.obj, (mesh) => {
                     count++
                     all_obj[`obj_${node.type}`] = mesh.children[0];
                     if (count == loadObj.length) {
-                        load(all_obj) 
-                       
+                        load(all_obj)
+                        this.Vue.onloadNum++
+                        this.Vue.onload()
                     }
                 });
             });
@@ -229,6 +230,8 @@ export default class Topo extends Base {
                 if (loadNumber == all_img.length) {
                     //所有图片加载完成
                     all_img_end()
+                    this.Vue.onloadNum++
+                    this.Vue.onload()
                 }
             })
         })
@@ -260,25 +263,25 @@ export default class Topo extends Base {
             this.addLink(link)
         })
         //测试连线 
-       /*  let num = 0
-        let time = setInterval(() => { 
-            if (num >= 5) {
+        /*  let num = 0
+         let time = setInterval(() => { 
+             if (num >= 5) {
+                 clearInterval(time)
+             }
+             let l = links[num]
+ 
+             this.addLine1(l)
+             num++
+         }, 3000) */
+        /* let num = 0
+        let time = setInterval(() => {
+            if (num >= links.length) {
                 clearInterval(time)
             }
             let l = links[num]
-
-            this.addLine1(l)
+            this.addLine([l.src.x, l.src.y, l.src.z], [l.dst.x, l.dst.y, -l.dst.z], '1-3-3')
             num++
         }, 3000) */
-       let num = 0
-          let time = setInterval(() => { 
-              if (num >= links.length) {
-                  clearInterval(time)
-              }
-              let l = links[num] 
-              this.addLine([l.src.x, l.src.y, l.src.z], [l.dst.x, l.dst.y, -l.dst.z], '1-3-3')
-              num++
-          }, 3000)   
         // scene.add(new THREE.Mesh(geometry, material));
     }
     addTitle(node) {
@@ -305,7 +308,7 @@ export default class Topo extends Base {
         plane.position.set(node.x, p(node.y) + theight / 2, p(node.z) + p(info_arr[2]) / 2 + 30);
         this.scene.add(plane);
     }
-    
+
     addNodes({ type, name, x = 0, y = 0, z = 0, id, info }) {
         if (type === "" || name === "") {
             alert("类型或者名字不能为空")

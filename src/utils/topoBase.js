@@ -408,8 +408,7 @@ export default class Topo extends Base {
         mesh.params_type = "step"
         this.scene.add(mesh);
 
-        let n = 0;
-        console.time()
+        let n = 0; 
         /*  let tim = setInterval(() => {
              n++;
              if (n >= cinum) {
@@ -437,8 +436,7 @@ export default class Topo extends Base {
         //线条动画
         var interval = (n) => {
             if (n >= cinum) {
-
-                console.timeEnd()
+ 
                 let t = setInterval(() => {
                     n--;
                     if (n < 0) {
