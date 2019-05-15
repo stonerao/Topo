@@ -45,7 +45,7 @@ let VM = new Vue({
             typeTop: [],
             attackTop5: [],
             sendInter: null,
-            attackType: 1
+            attackType: 1, 
         }
     },
     created() {
@@ -184,6 +184,7 @@ let VM = new Vue({
             if (this.onloadNum == 2) {
                 //全部加载完成
                 this.socket()
+                this.blacksocket()
             }
         },
         socket(func) {
@@ -246,8 +247,9 @@ let VM = new Vue({
                     }, 5000)
                 }
             };
-        },
-
+        }, 
+       
+        
         objLoad() {
             //所有图形加载完毕
             this.get()

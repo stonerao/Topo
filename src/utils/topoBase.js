@@ -195,7 +195,7 @@ export default class Topo extends Base {
         // var geometry = new THREE.CircleBufferGeometry(radius + 50, 32);
         var geometry = new THREE.PlaneGeometry(radius * 2, radius * 2, 1);
 
-        let height = position[1].toString() * 2 + 400
+        let height = position[1].toString() * 2 + 180
         let number = 1;
         position[0] = position[0];
         let plane_arr = [];

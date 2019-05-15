@@ -225,11 +225,11 @@ let template6 =
 				<div v-for="(item,index) in items" :key="index" :class="index==0?'High_risk':index==1?'Middle_risk':'Low_risk'">
 					<div class="a_circle">
 					</div>
-					<div class="b_circle">21</div>
+					<div class="b_circle">{{item.value}}</div>
 					<div class="c_title">
                         <i></i>
                         
-						<p>{{item.name}}{{index}}</p>
+						<p>{{item.name}} </p>
 					</div>
 				</div>
 			</div>

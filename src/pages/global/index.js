@@ -45,7 +45,10 @@ let VM = new Vue({
             typeTop:[],
             attackTop5:[],
             sendInter:null,
-            attackType:1
+            attackType:1,
+            attackType1:1,
+            ws:null,
+            ws1: null,
         }
     },
     created() {
@@ -185,6 +188,7 @@ let VM = new Vue({
             if (this.onloadNum == 2) {
                 //全部加载完成
                 this.socket()
+                this.blacksocket()
             }
         },
         socket(func) { 
@@ -248,7 +252,37 @@ let VM = new Vue({
                 }
             };
         },
+        blacksocket(func) {
+            clearInterval(this.sendInter1)
+            let url = this.attackType == '1' ? 'additionalGlobal' : 'additionalPlayback'
+            this.ws1 = new WebSocket(`ws://172.18.0.23/mimic/websocket/` + url);
+            this.ws1.onopen = () => {
+                
+                this.sendInter1 = setInterval(() => {
+                    this.ws1.send("{'test':'1'}")
+                }, 10000);
+            };
+            this.ws1.onmessage = e => {
+                let data = JSON.parse(e.data)
+                //  str = {"levelTop":[{"name":"3","value":928},{"name":"2","value":0},{"name":"1","value":0}],"path":[{"start":"130","end":"13"},{"start":"102","end":"13"},{"start":"71","end":"10"},{"start":"112","end":"13"},{"start":"144","end":"10"}],"srcTop":[{"name":"team12","value":19},{"name":"team5","value":17},{"name":"team4","value":17},{"name":"team1","value":16},{"name":"team13","value":15}],"typeTop":[{"name":"web扫描","value":353}],"dstTop":[{"name":"白盒拟态路由器","value":193},{"name":"白盒拟态WEB服务器","value":160}]}
 
+                console.log(data)
+
+
+
+            }
+            this.ws1.onerror = e => { };
+            this.ws1.onclose = () => {
+                //通道关闭了
+                if (this.ws1.readyState == 3) {
+                    //五秒钟后重连
+                    setTimeout(() => {
+                        this.blacksocket();
+                        // this.socket(func());
+                    }, 5000)
+                }
+            };
+        },
         objLoad() {
             //所有图形加载完毕
             this.get()
