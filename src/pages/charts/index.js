@@ -138,6 +138,23 @@ Vue.component("b-view", {
     mounted(){
     }
 })
+Vue.component("t-circle", {
+    template: '#item-template6',
+    name: "t-circle",
+    data(){
+        return {
+            attakList:[
+                {type:1,value:21,name:'高危'},
+                {type:2,value:18,name:'中危'},
+                {type:3,value:16,name:'低危'},
+            ]
+        }
+    },
+    methods:{
+    },
+    mounted(){
+    }
+})
 
 
 let VM = new Vue({

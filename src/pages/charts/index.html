@@ -18,18 +18,16 @@
 
 	<link rel="stylesheet" href="./assets/styles/reset.css">
 	<link rel="stylesheet" href="./assets/styles/animate.css">
-
+	<!-- 组件 左侧柱状图 -->
 	<script type="text/x-template" id="item-template">
-		<!-- 组件 左侧柱状图 -->
 		<div class="l_chart">
 			<p>攻击队伍TOP5</p>
 			<ul>
 				<li v-for="(item,index) in attackList" :key="index">
 					<i></i>
-					<p>{{item.name}}</p>
 					<div>
-						<span :style="'width:'+item.value/maxValue*100+'%;'" class="_bar"></span>
 						<span class="bar_value">{{item.value}}</span>
+						<span class="bar_name">{{item.name}}</span>
 					</div>
 					
 				</li>
@@ -37,28 +35,24 @@
 		</div>
 	</script>
 
-
+	<!-- 组件 右侧柱状图 -->
 	<script type="text/x-template" id="item-template1">
-		<!-- 组件 右侧柱状图 -->
 		<div class="r_chart">
-			<p>攻击类型TOP5</p>
+			<p>攻击队伍TOP5</p>
 			<ul>
 				<li v-for="(item,index) in attackList" :key="index">
-					<i></i>
-					<p>{{item.name}}</p>
 					<div>
 						<span class="bar_value">{{item.value}}</span>
-						<span :style="'width:'+item.value/maxValue*100+'%;'" class="_bar"></span>
+						<span class="bar_name">{{item.name}}</span>
 					</div>
-					
+					<i></i>
 				</li>
 			</ul>
 		</div>
 	</script>
 
-
+	<!-- 组件 顶部队伍列表-->
 	<script type="text/x-template" id="item-template2">
-		<!-- 组件 顶部队伍列表-->
 		<div class="rank_group">
 			<div class="rank_item" @click="rankShow=!rankShow">
 				<span>
@@ -78,8 +72,9 @@
 			</div>
 		</div>
 	</script>
+
+	<!-- 组件 左侧威胁列表-->
 	<script type="text/x-template" id="item-template3">
-		<!-- 组件 左侧威胁列表-->
 		<div class="threat_list"  radomId="scroll_content">
 			<p>威胁列表</p>
 			<ul>
@@ -91,8 +86,9 @@
 			</ul>
 		</div>
 	</script>
+
+	<!-- 组件 右侧威胁步骤-->
 	<script type="text/x-template" id="item-template4">
-		<!-- 组件 右侧威胁步骤-->
 		<div class="step_list"  radomId="scroll_content">
 			<p>威胁步骤</p>
 			<ul>
@@ -104,12 +100,32 @@
 			</ul>
 		</div>
 	</script>
+
+	<!-- 组件 底部全局视角-->
 	<script type="text/x-template" id="item-template5">
 		<div class="all_view">
 			<i></i>
 			<span>全局视角</span>
 			<div>
 				全局场景置放
+			</div>
+		</div>
+	</script>
+
+	<!-- 组件 复杂攻击统计-->
+	<script type="text/x-template" id="item-template6">
+		<div class="a_statistics">
+			<p>复杂攻击统计</p>
+			<div class="_back">
+				<div v-for="item in attakList" :key="item.type" :class="item.type==1?'High_risk':item.type==2?'Middle_risk':'Low_risk'">
+					<div class="a_circle">
+					</div>
+					<div class="b_circle">21</div>
+					<div class="c_title">
+						<i></i>
+						<p>{{item.name}}</p>
+					</div>
+				</div>
 			</div>
 		</div>
 	</script>
@@ -134,24 +150,25 @@
 			</div>
 		</div>
 		<div class="_content">
-			<!-- 页面1柱状图 -->
-			<!-- <div class="chart_Group pos_left">
+			<!-- 页面1 -->
+			<div class="chart_Group pos_left">
 				<div class="l_group">
 					<l-chart></l-chart>
 					<l-chart></l-chart>
 				</div>
 				
 			</div>
-			<div class="chart_Group pos_right">
+			<div class="pos_right">
 				<div class="r_group">
-					<r-chart></r-chart>
-					<r-chart></r-chart>
+					<t-circle></t-circle>
 				</div>
-			</div> -->
+				<r-chart></r-chart>
+			</div>
+			
 
 
-			<!-- 页面2 队伍选择 -->
-			<div class="list_Group">
+			<!-- 页面2 -->
+			<!-- <div class="list_Group">
 				<t-rank></t-rank>
 			</div> 
 			<div class="list_Group">
@@ -160,7 +177,7 @@
 			<div class="list_Step">
 				<r-step></r-step>
 			</div>
-			<b-view></b-view>
+			<b-view></b-view> -->
 
 		</div>
 		
