@@ -445,6 +445,7 @@ li {
         left:20px;
         .threat_list{
             position: relative;
+            height:800px;
             >p{
                 font-size:22px;
                 font-family:PingFangSC-Semibold;
@@ -514,7 +515,15 @@ li {
         position:absolute;
         right:20px;
         top:114px;
+        width:280px;
+          overflow: hidden;
         .step_list{
+            position: absolute;
+            top:0;
+            right:0;
+            bottom:120px;
+            left:40px;
+          
             >p{
                 font-size:22px;
                 font-family:PingFangSC-Semibold;
@@ -526,6 +535,8 @@ li {
                 text-align:right;
             }
             >ul{
+                position: relative;
+                transition: all .2s;
                 >li{
                     margin-bottom:15px;
                     height:44px;

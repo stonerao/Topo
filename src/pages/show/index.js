@@ -45,7 +45,10 @@ let VM = new Vue({
             typeTop: [],
             attackTop5: [],
             sendInter: null,
-            attackType: 1
+            attackType: 1,
+            attackType1: 1,
+            ws: null,
+            ws1: null,
         }
     },
     created() {
@@ -58,108 +61,6 @@ let VM = new Vue({
     },
     mounted() {
 
-        /* this.node = {
-            x: 0,
-            y: 0,
-            z: 0,
-            name: "测试",
-            type: "1",
-            id: this.max_id++
-        }
-
-        setTimeout(() => {
-            this.new_submit()
-        }) */
-        /*  const random = () => {
-             return parseInt(Math.random() * (Math.random() > 0.5 ? 1200 : -1200))
-         }
-         types.forEach(x => {
-             this.nodes.push({
-                 type: x.type,
-                 x: random(),
-                 y: 0,
-                 z: random(),
-                 name: x.name,
-                 id: ++this.max_id,
-                 children: []
-             })
- 
-         })
-         this.save()  */
-        /*  let n = 0;
-         this.nodes = graphs.nodes;
-         this.links = graphs.links;
-         this.save() */
-        /*  var graphs = JSON.parse(this.getSaveData())
-         let nodes = graphs.nodes;
-         let links = graphs.links;
-         let get = (data) => {
-             data.forEach(node => {
-                 if (node.type == 11) {
-                     console.log(node)
-                     node.children.forEach((x, i) => {
-                         x.x = parseInt(node.x) + i * 30 - 40
-                         x.z = parseInt(node.z) + 80,
-                             x.y = node.y
-                     })
-                 }
-                 //    links.forEach(x => {
-                 //         if (node.id == x.src.id) {
-                 //             x.src.x = node.x
-                 //             x.src.y = node.y
-                 //             x.src.z = node.z
-                 //         }
-                 //         if (node.id == x.dst.id) {
-                 //             x.dst.x = node.x
-                 //             x.dst.y = node.y
-                 //             x.dst.z = node.z
-                 //         }
-                 //     }) 
-                 if (node.children.length > 0 && Array.isArray(node.children)) {
-                     get(node.children)
-                 }
-             })
-         }
-         get(nodes)
-         let n = this.linksHui(graphs)
-         this.links = n.links;
-         this.nodes = n.nodes;
-         this.save() */
-
-        // window.localStorage.setItem("graph", JSON.stringify(graphs))
-        setTimeout(() => {
-            // this.restore()   
-            /*       this.node = {
-                      x: "100",
-                      y: "0",
-                      z: "100",
-                      name: "213",
-                      type: "11",
-                      id: "3",
-                      info: "5.png"
-                  }
-                  this.new_submit()
-                 
-*/
-
-            /*   let nodes = graphs.nodes;
-              let links = graphs.links;
-              let index = 0;
-              let get = (data) => {
-                  data.forEach(node => {
-                      if (node.type == 9) {
-                          if (index < 30) {
-                              index++;
-                          }
-                      }
-                      if (node.children.length > 0 && Array.isArray(node.children)) {
-                          get(node.children)
-                      }
-                  })
-              }
-              get(nodes) */
-
-        }, 3000)
 
 
     },
@@ -180,15 +81,17 @@ let VM = new Vue({
             })
         },
         onload() {
-            console.log(this.onloadNum)
             if (this.onloadNum == 2) {
                 //全部加载完成
                 this.socket()
+ 
+
             }
         },
+
         socket(func) {
             clearInterval(this.sendInter)
-            let url = this.attackType == '1' ? 'normalGlobal' : 'additionalPlayback'
+            let url = this.attackType == '1' ? 'normalGlobal' : 'additionalGlobal'
             this.ws = new WebSocket(`ws://172.18.0.23/mimic/websocket/` + url);
             this.ws.onopen = () => {
                 // this.ws.send(JSON.stringify({ "unitId": this.unitId.toString() }))
@@ -199,13 +102,43 @@ let VM = new Vue({
             };
             this.ws.onmessage = e => {
                 let data = JSON.parse(e.data)
+
                 //  str = {"levelTop":[{"name":"3","value":928},{"name":"2","value":0},{"name":"1","value":0}],"path":[{"start":"130","end":"13"},{"start":"102","end":"13"},{"start":"71","end":"10"},{"start":"112","end":"13"},{"start":"144","end":"10"}],"srcTop":[{"name":"team12","value":19},{"name":"team5","value":17},{"name":"team4","value":17},{"name":"team1","value":16},{"name":"team13","value":15}],"typeTop":[{"name":"web扫描","value":353}],"dstTop":[{"name":"白盒拟态路由器","value":193},{"name":"白盒拟态WEB服务器","value":160}]}
                 let { path, srcTop, dstTop, levelTop, typeTop } = data;
-                console.log(data)
+                let paths = path.filter((x, i) => i < 5)
                 let arr = []
-                path.forEach(x => {
-                    let index = 0;
+
+                var addline = (arr) => {
+                    if (arr.length == 0) {
+                        return
+                    }
+
+                    let item = arr.shift()
                     let obj = {}
+                    let index = 0;
+                    while (index < this.nodes.length) {
+                        let node = this.nodes[index];
+                        if (item.start == node.id) {
+                            obj.src = node;
+                        }
+                        if (item.end == node.id) {
+                            obj.dst = node;
+                        }
+
+                        index++;
+                    }
+                    if (obj.hasOwnProperty("src") && obj.hasOwnProperty("dst")) {
+                        // arr.push(obj) 
+                        topo.addLine([obj.src.x, obj.src.y, obj.src.z], [obj.dst.x, obj.dst.y, obj.dst.z], '2-' + path.length % 4 + '-3')
+                    }
+                    setTimeout(() => {
+                        addline(arr)
+                    }, 30)
+                }
+                addline(paths)
+                /* paths.forEach(x => {
+                    let index = 0;
+                    let obj = {} 
                     while (index < this.nodes.length) {
                         let node = this.nodes[index];
                         if (x.start == node.id) {
@@ -214,15 +147,14 @@ let VM = new Vue({
                         if (x.end == node.id) {
                             obj.dst = node;
                         }
-
+                        
                         index++;
-                    }
+                    } 
                     if (obj.hasOwnProperty("src") && obj.hasOwnProperty("dst")) {
-                        // arr.push(obj)
-                        topo.buildingAnimation([obj.dst.x, obj.dst.y, obj.dst.z], 50)
-                        topo.addLine([obj.src.x, obj.src.y, obj.src.z], [obj.dst.x, obj.dst.y, obj.dst.z], '2-' + path.length % 4 + '-3')
+                        // arr.push(obj) 
+                        topo.addLine([obj.src.x, obj.src.y, obj.src.z], [obj.dst.x, obj.dst.y, obj.dst.z], '2-' + path.length%4+'-3')
                     }
-                })
+                })  */
 
                 // 攻击队伍top5
                 this.teamTop5 = srcTop
@@ -247,7 +179,7 @@ let VM = new Vue({
                 }
             };
         },
-
+        
         objLoad() {
             //所有图形加载完毕
             this.get()
@@ -301,31 +233,6 @@ let VM = new Vue({
                 nodes: this.returnNode(data.nodes),
                 links: data.links
             })
-            /* 
-            let { nodes, links } = JSON.parse(data)
-            this.nodes = nodes;
-            this.links = links;
-            var getNode = (data) => {
-                if (this.max_id <= data.id) {
-                    this.max_id = parseInt(data.id) + 1
-                }
-                topo.addNodes({
-                    ...data
-                })
-                if (data.children.length != 0) {
-                    data.children.forEach((n, index) => {
-                        setTimeout(() => {
-                            getNode(n);
-                        }, 500)
-                    })
-                }
-                return false
-            }
-            this.nodes.forEach((node, index) => {
-                getNode(node);
-            })
-            topo.updataLink(); */
-
 
         },
         clcikNode(node) {
@@ -537,7 +444,21 @@ let VM = new Vue({
         }
     }
 })
- 
+
+function initScroll(id, state) {
+    let params = {
+        wheelSpeed: 1,
+        wheelPropagation: true,
+        minScrollbarLength: 20,
+        useBothWheelAxes: true
+    }
+    if (state == 'x') {
+        params.suppressScrollY = true
+        params.swipeEasing = true
+    }
+    const ps = new PerfectScrollbar(id, params);
+    return ps
+}
 let topo = new Topo({
     el: "#canvas",
     width: window.innerWidth,
@@ -548,7 +469,7 @@ let topo = new Topo({
     data: [],
     VUE: VM,
     typeMap: types,
-    deep: 50,
+    // deep: 100,
     cameraPosition: {
         x: 300,
         y: 1800,

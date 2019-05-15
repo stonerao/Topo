@@ -34,30 +34,33 @@
 		</ul>
 	</script>
 	<style>
-		body{
+		body {
 			overflow: hidden;
 		}
+
 		.ifram {
 			position: absolute;
 			right: 0;
 			bottom: 0;
-			top:0;
-			left:0;
+			top: 0;
+			left: 0;
 		}
-		.samll{
-			width:300px;
-			height:300px;
+
+		.samll {
+			width: 300px;
+			height: 300px;
 			position: absolute;
-			bottom:0;
-			right:0;
+			bottom: 0;
+			right: 0;
 		}
-		.active{
+
+		.all_view.active {
 			width: 100%;
-			height:100%;
+			height: 100%;
 		}
 	</style>
 	<script>
-		 window.onload = function () {
+		window.onload = function () {
 			/*  setTimeout(() => {
 				let dom = document.getElementById("IFRAM")
 				dom.style.width = window.innerWidth;
@@ -77,20 +80,20 @@
 <body>
 	<div id="app">
 		<div class="list_Group">
-			<t-rank></t-rank>
+			<t-rank :teams="teams"></t-rank>
 		</div>
 		<div class="list_Group">
-			<l-list></l-list>
+			<l-list :items="threat" :threat_id="threat_id" @clickTreat="clickTreat"></l-list>
 		</div>
 		<div class="list_Step">
-			<r-step></r-step>
+			<r-step :items="ThreatInformation" :sindex="stepIndex"></r-step>
 		</div>
-		<b-view>
-				<iframe slot="main" height="100%" width="100%" src="/show.html?type=1" frameborder="0"></iframe>
+		<b-view @full="full" :class="isfull?'active':''">
+			<iframe slot="main" height="100%" width="100%" src="/show.html?type=1" frameborder="0"></iframe>
 		</b-view>
-		
-		</div>
-		 
+
+
+
 		<canvas style="width:1000px;height:800px" id="canvas"></canvas>
 	</div>
 

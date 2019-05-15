@@ -45,7 +45,18 @@ let VM = new Vue({
             typeTop: [],
             attackTop5: [],
             sendInter: null,
-            attackType: 1, 
+            attackType: 1,
+            teams: [],
+            hostTeam: [],
+            threat: [],
+            ThreatInformation: [],
+            stepIndex:0,
+            threat_id:"", 
+            team_obj:{
+                name:"",
+                img:""
+            },
+            isfull:false
         }
     },
     created() {
@@ -55,115 +66,115 @@ let VM = new Vue({
         }
         this.attackType = query.type
         this.get(this.attackType)
+        this.getTeam();
+        if (query.hasOwnProperty("cookie")) {
+            this.hostTeam = JSON.parse(window.localStorage.getItem("teams"))
+            this.loadGlobal(this.hostTeam, 0)
+        }
     },
     mounted() {
 
-        /* this.node = {
-            x: 0,
-            y: 0,
-            z: 0,
-            name: "测试",
-            type: "1",
-            id: this.max_id++
-        }
-
-        setTimeout(() => {
-            this.new_submit()
-        }) */
-        /*  const random = () => {
-             return parseInt(Math.random() * (Math.random() > 0.5 ? 1200 : -1200))
-         }
-         types.forEach(x => {
-             this.nodes.push({
-                 type: x.type,
-                 x: random(),
-                 y: 0,
-                 z: random(),
-                 name: x.name,
-                 id: ++this.max_id,
-                 children: []
-             })
- 
-         })
-         this.save()  */
-        /*  let n = 0;
-         this.nodes = graphs.nodes;
-         this.links = graphs.links;
-         this.save() */
-        /*  var graphs = JSON.parse(this.getSaveData())
-         let nodes = graphs.nodes;
-         let links = graphs.links;
-         let get = (data) => {
-             data.forEach(node => {
-                 if (node.type == 11) {
-                     console.log(node)
-                     node.children.forEach((x, i) => {
-                         x.x = parseInt(node.x) + i * 30 - 40
-                         x.z = parseInt(node.z) + 80,
-                             x.y = node.y
-                     })
-                 }
-                 //    links.forEach(x => {
-                 //         if (node.id == x.src.id) {
-                 //             x.src.x = node.x
-                 //             x.src.y = node.y
-                 //             x.src.z = node.z
-                 //         }
-                 //         if (node.id == x.dst.id) {
-                 //             x.dst.x = node.x
-                 //             x.dst.y = node.y
-                 //             x.dst.z = node.z
-                 //         }
-                 //     }) 
-                 if (node.children.length > 0 && Array.isArray(node.children)) {
-                     get(node.children)
-                 }
-             })
-         }
-         get(nodes)
-         let n = this.linksHui(graphs)
-         this.links = n.links;
-         this.nodes = n.nodes;
-         this.save() */
-
-        // window.localStorage.setItem("graph", JSON.stringify(graphs))
-        setTimeout(() => {
-            // this.restore()   
-            /*       this.node = {
-                      x: "100",
-                      y: "0",
-                      z: "100",
-                      name: "213",
-                      type: "11",
-                      id: "3",
-                      info: "5.png"
-                  }
-                  this.new_submit()
-                 
-*/
-
-            /*   let nodes = graphs.nodes;
-              let links = graphs.links;
-              let index = 0;
-              let get = (data) => {
-                  data.forEach(node => {
-                      if (node.type == 9) {
-                          if (index < 30) {
-                              index++;
-                          }
-                      }
-                      if (node.children.length > 0 && Array.isArray(node.children)) {
-                          get(node.children)
-                      }
-                  })
-              }
-              get(nodes) */
-
-        }, 3000)
-
-
     },
     methods: {
+        full(){ 
+            this.isfull = !this.isfull
+
+        },
+        clickTreat(id) {
+            //点击威胁
+            console.log(id)
+        },
+        getThreatList(id) {
+            axios("/mimic/threat/getThreatList", {
+                params: {
+                    teamId: id,
+                    skip: 0,
+                    amount: 20
+                }
+            }).then(res => {
+                this.threat = res.list
+            })
+        },
+        deletePlayList(id) {
+            axios("/mimic/threat/deletePlayList", {
+                params: {
+                    id: id,
+                    topologyId: this.attackType == 2 ? '1' : '2'
+                }
+            }).then(res => {
+                 
+            })
+        },
+        
+        reloadPlayback(id) {
+            axios("/mimic/threat/reloadPlayback", {
+                params: { 
+                    topologyId: this.attackType == 2 ? '1' : '2'
+                }
+            }) 
+        },
+        
+        getThreatInformation(id) {
+            axios("/mimic/threat/getThreatInformation", {
+                params: {
+                    id: id,
+                    topologyId: this.attackType == 2 ? '1' : '2'
+                }
+            }).then(res => {
+                let str = '{"information":[{"date":"2019-05-15 04:46:05","type":"拟态存储漏洞攻击","steps":[{"reference":"2-4-1","name":"资源窃取","node_id":["46","45","14","1","9","10"]},{"reference":"2-2-1","name":"资源窃取","node_id":["33","15","14","13","9","34"]}]}],"ret_code":0}'
+                res = JSON.parse(str)
+                // this.ThreatInformation = res.information[0].steps;
+                for(let i=0;i<2;i++){
+                    this.ThreatInformation.push(...res.information[0].steps)
+                }
+                this.getAttackLine(this.ThreatInformation)
+            })
+        },
+        loadGlobal(item, index = 0) {
+            // 
+            if (index > item.length || item.length == 0) {
+                return
+            } else { 
+                this.getThreatList(item[index].teamId)
+                this.getThreatInformation(item[index].id)
+                this.threat_id = item[index].id
+            }
+            // let index = 0;
+
+        },
+        getAttackLine(steps) {
+            this.stepIndex = 0;
+            //开始走攻击线
+            let links = JSON.parse(JSON.stringify(steps))
+            let addLine = (arr) => { 
+                this.stepIndex++;
+                if (arr.length == 0) {
+                    this.deletePlayList(this.threat_id)
+                    this.reloadPlayback(this.threat_id)
+                    history.go(-1)
+                    return
+                }
+                let obj = arr.shift();
+                let arrs = []
+                obj.node_id.forEach(n => {
+                    this.nodes.forEach(node => {
+                        if (n == node.id) {
+                            arrs.push(node)
+                        }
+                    })
+                })
+                topo.addLineBlack(arrs, obj.reference, () => {
+                    addLine(arr)
+                })
+            }
+            addLine(links)
+
+        },
+        getTeam(id) {
+            axios("/mimic/team/list").then(res => {
+                this.teams = res.list
+            })
+        },
         get(id) {
             axios("/mimic/topology/get", {
                 params: {
@@ -180,10 +191,9 @@ let VM = new Vue({
             })
         },
         onload() {
-            console.log(this.onloadNum)
             if (this.onloadNum == 2) {
                 //全部加载完成
-                this.socket()
+                // this.socket()
                 this.blacksocket()
             }
         },
@@ -202,7 +212,6 @@ let VM = new Vue({
                 let data = JSON.parse(e.data)
                 //  str = {"levelTop":[{"name":"3","value":928},{"name":"2","value":0},{"name":"1","value":0}],"path":[{"start":"130","end":"13"},{"start":"102","end":"13"},{"start":"71","end":"10"},{"start":"112","end":"13"},{"start":"144","end":"10"}],"srcTop":[{"name":"team12","value":19},{"name":"team5","value":17},{"name":"team4","value":17},{"name":"team1","value":16},{"name":"team13","value":15}],"typeTop":[{"name":"web扫描","value":353}],"dstTop":[{"name":"白盒拟态路由器","value":193},{"name":"白盒拟态WEB服务器","value":160}]}
                 let { path, srcTop, dstTop, levelTop, typeTop } = data;
-                console.log(data)
                 let arr = []
                 path.forEach(x => {
                     let index = 0;
@@ -247,9 +256,9 @@ let VM = new Vue({
                     }, 5000)
                 }
             };
-        }, 
-       
-        
+        },
+
+
         objLoad() {
             //所有图形加载完毕
             this.get()
@@ -410,7 +419,6 @@ let VM = new Vue({
         },
         save_node() {
             let { x, y, z, type, name, id } = this.node;
-            console.log(Object.values(this.node).includes(""))
             /* if (Object.values(this.node).includes("")) {
                 return
             } */
@@ -573,7 +581,6 @@ let topo = new Topo({
     click: function (data) {
         let index = 0;
         let mesh = null
-        console.log(JSON.stringify(data[0].point))
         //如果点击的地板 互相关联
         while (index < data.length) {
             if (data[index].object.type == "Mesh") {

@@ -28,7 +28,8 @@ export default class Topo extends Base {
             height: null,
             click: null,
             data: [],//存储所有添加的节点
-            links: []
+            links: [],
+            meshLine: []
         }
         this.deep = options.deep || false;
 
@@ -56,7 +57,31 @@ export default class Topo extends Base {
         window.addEventListener("resize", this.onWindowResize)
         var SELECT_IMG = new Image()
         SELECT_IMG.src = "/assets/image/select_city1.png"
-        this.SELECT_IMG = SELECT_IMG
+        this.SELECT_IMG = SELECT_IMG;
+        this.startImgs = {
+            "2-1-1": "./assets/image/2-1-1.png",
+            "2-1-2": "./assets/image/2-1-2.png",
+            "2-1-3": "./assets/image/2-1-3.png",
+            "2-2-1": "./assets/image/2-2-1.png",
+            "2-2-2": "./assets/image/2-2-2.png",
+            "2-2-3": "./assets/image/2-2-3.png",
+            "2-2-4": "./assets/image/2-2-4.png",
+            "2-2-5": "./assets/image/2-2-5.png",
+            "2-3-1": "./assets/image/2-3-1.png",
+            "2-3-2": "./assets/image/2-3-2.png",
+            "2-3-3": "./assets/image/2-3-3.png",
+            "2-3-5": "./assets/image/2-3-4.png",
+            "2-3-4": "./assets/image/2-3-5.png",
+            "2-4-1": "./assets/image/2-4-1.png",
+            "2-4-2": "./assets/image/2-4-2.png",
+            "2-4-3": "./assets/image/2-4-3.png",
+        }
+        
+        for (var key in this.startImgs) {
+            var img = new Image()
+            img.src = this.startImgs[key]
+            this.startImgs[key] = img
+        }
     }
     _init({
         welgl = 1,
@@ -392,33 +417,90 @@ export default class Topo extends Base {
     strToNumbern(num) {
         return parseFloat(num)
     }
-    addLine1(line) {
-        for (let key in line) {
-            line[key].x = parseFloat(line[key].x)
-            line[key].y = parseFloat(line[key].y)
-            line[key].z = parseFloat(line[key].z)
-        }
-        var curve = new THREE.SplineCurve3([
-            new THREE.Vector3(0, 0, 10),
-            new THREE.Vector3(100 / 2, 40, 180 / 2),
-            new THREE.Vector3(100, 0, 180),
-        ]);
-        var geometry = new THREE.Geometry();
-        geometry.vertices = curve.getPoints(50);
-        var material = new THREE.LineBasicMaterial({ color: 0xff0000 });
-        var line = new THREE.Line(geometry, material);
-        this.scene.add(line)
-        /* var geometry = new THREE.Geometry();
-        for (let i = 0; i < cinum; i++) {
-            geometry.vertices.push(new THREE.Vector3(...src));
+    deleteMeshLine() {
+        this.options.meshLine.forEach(line => {
+            this.dispose(line)
+        })
+    }
+    addLineShowStep(img_code, position) {
+        //连线展示开始图标
+        let canvas = document.createElement('canvas');
+        let RECT_SIZE = 128; //大小
+        canvas.width = RECT_SIZE;
+        canvas.height = RECT_SIZE;
+        let context = canvas.getContext("2d");
+        context.drawImage(this.startImgs[img_code], 0, 0, RECT_SIZE, RECT_SIZE);
+
+        let routerName = new THREE.Texture(canvas);
+        routerName.needsUpdate = true;
+        let sprMat = new THREE.SpriteMaterial({ map: routerName });
+        let spriteText = new THREE.Sprite(sprMat);
+        let sprScale = 80;
+        spriteText.scale.set(sprScale, sprScale, 1);
+        spriteText.position.set(position[0], position[1], position[2]);
+        spriteText.params_type = "step"
+        this.scene.add(spriteText);
+        this.options.meshLine.push(spriteText)
+        return spriteText
+    }
+    addLineBlack(arr, reference,func) { 
+        let colorIndex = reference.split("-")[1];
+        // colorIndex = Math.random() < 0.2 ? '4' : colorIndex
+        let mesh_line
+        switch (colorIndex) {
+            case "1":
+                mesh_line = this.Material.linne_mesh_1
+                break
+            case "2":
+                mesh_line = this.Material.linne_mesh_2
+                break
+            case "3":
+                mesh_line = this.Material.linne_mesh_3
+                break
+            default:
+                mesh_line = this.Material.linne_mesh_4 
         }
         var line = new MeshLine();
+        var geometry = new THREE.Geometry();
+        let lineNum = arr.length * 200;
+        for (let i = 0; i < lineNum; i++) {
+            geometry.vertices.push(new THREE.Vector3(arr[0].x, arr[0].y, arr[0].z));
+        }
         line.setGeometry(geometry);
         var mesh = new THREE.Mesh(line.geometry, mesh_line);
         mesh.frustumCulled = false;
-        mesh.params_type = "step"
-        this.scene.add(mesh); */
+        mesh.params_type = "step";
+        this.scene.add(mesh)
+        this.options.meshLine.push(mesh)
+        let stepTurt = this.addLineShowStep(reference, [arr[0].x, arr[0].y, arr[0].z])
+        let addLine = (arr) => {
+            if (arr.length == 1) {
+                setTimeout(()=>{
+                    this.deleteMeshLine();
+                    typeof func=='function'?func():null;
+                },1000)
+                return
+            }
+            let obj = arr.shift();
+            let src = {
+                x: parseInt(obj.x),
+                y: parseInt(obj.y),
+                z: parseInt(obj.z) + 1
+            }
+            let dst = {
+                x: parseInt(arr[0].x),
+                y: parseInt(arr[0].y),
+                z: parseInt(arr[0].z) + 1
+            }
+            this.animated(src, dst, 1000, () => {
+                line.advance(new THREE.Vector3(src.x, src.y, src.z))
+                stepTurt.position.set(src.x, src.y, src.z)
+            }, () => {
+                addLine(arr)
+            })
 
+        }
+        addLine(arr)
     }
     addLine(src, dst, reference, end) {
         if (!src || !dst) {
@@ -463,7 +545,7 @@ export default class Topo extends Base {
             (_src.z + _dst.z) / 2
         ]
 
-        let cinum = 80;
+        let cinum = 60;
 
         var curve = new THREE.CatmullRomCurve3([
             new THREE.Vector3(_src.x, _src.y, _src.z),
@@ -518,8 +600,8 @@ export default class Topo extends Base {
          }, 5) */
         //线条动画
         var interval = (n) => {
-            if (n >= cinum) {
-
+            if (n >= cinum) { 
+                this.buildingAnimation(dst, 50)
                 let t = setInterval(() => {
                     n--;
                     if (n < 0) {
@@ -575,7 +657,9 @@ export default class Topo extends Base {
         }) */
     }
     animationFrame() {
-        _this.stats.update()
+        if (_this.stats) {
+            _this.stats.update()
+        }
         _this.renderer.render(_this.scene, _this.camera);
         if (typeof _this.deep == 'number') {
             setTimeout(() => {
