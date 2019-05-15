@@ -287,7 +287,7 @@ export default class Topo extends Base {
     addTitle(node) {
         //不需要字的地板 
         let info_arr = node.info.split(",")
-        let [twidth, theight] = [200, 40]
+        let [twidth, theight] = [info_arr[3].length*32+32, 40]
         let color = info_arr[4] == '1' ? '#ffba47' : '#0094f8'
         let textImg = this.loadText({ width: twidth, height: theight, text: info_arr[3], color: color })
         let routerName = new THREE.Texture(textImg);

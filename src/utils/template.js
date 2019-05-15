@@ -1,12 +1,11 @@
-import "./index.less";
-import Vue from 'vue/dist/vue.js' 
-import { icons } from '../../utils/icon'
+import Vue from 'vue/dist/vue.js'
+import { icons } from '../utils/icon'
 // - 组件 左侧柱状图 
 let template = `
     <div class="l_chart">
-		<p>攻击队伍TOP5</p>
+		<p>{{title}}</p>
 		<ul>
-			<li v-for="(item,index) in attackList" :key="index">
+			<li v-for="(item,index) in items" :key="index">
 				<i></i>
 				<div>
 					<span class="bar_value">{{item.value}}</span>
@@ -20,22 +19,15 @@ let template = `
 Vue.component("l-chart", {
     template: template,
     name: "chart-item",
+    props: ['items', 'title'],
     data() {
         return {
-            attackList: [
-                { name: '华大科技队', value: 121 },
-                { name: '中大网按', value: 101 },
-                { name: '科技大学研究所', value: 81 },
-                { name: '天安网络科技', value: 61 },
-                { name: '西南联合', value: 41 },
-            ],
-            maxValue: 1,
+
         }
     },
     mounted() {
-        let arr = this.attackList.map(x => x.value);
-        this.maxValue = Math.max(...arr);
 
+        console.log(this.items)
     },
     methods: {
     }
@@ -43,9 +35,9 @@ Vue.component("l-chart", {
 // 组件 左侧柱状图
 let template1 = `
     <div class="r_chart">
-        <p>攻击队伍TOP5</p>
+        <p>{{title}}</p>
         <ul>
-            <li v-for="(item,index) in attackList" :key="index">
+            <li v-for="(item,index) in items" :key="index">
                 <div>
                     <span class="bar_value">{{item.value}}</span>
                     <span class="bar_name">{{item.name}}</span>
@@ -60,9 +52,7 @@ let template1 = `
 Vue.component("r-chart", {
     template: template1,
     name: "r-chart",
-    props: {
-
-    },
+    props: ['items', 'title'],
     data() {
         return {
             attackList: [
@@ -210,9 +200,8 @@ let template5 = `
     <div class="all_view">
 		<i></i>
 		<span>全局视角</span>
-		<div>
-			全局场景置放
-		</div>
+		 
+        <slot name="main"></slot>
     </div>
 `
 Vue.component("b-view", {
@@ -231,15 +220,16 @@ Vue.component("b-view", {
 let template6 =
     `
 		<div class="a_statistics">
-			<p>复杂攻击统计</p>
+			<p>{{title}}</p>
 			<div class="_back">
-				<div v-for="item in attakList" :key="item.type" :class="item.type==1?'High_risk':item.type==2?'Middle_risk':'Low_risk'">
+				<div v-for="(item,index) in items" :key="index" :class="index==0?'High_risk':index==1?'Middle_risk':'Low_risk'">
 					<div class="a_circle">
 					</div>
 					<div class="b_circle">21</div>
 					<div class="c_title">
-						<i></i>
-						<p>{{item.name}}</p>
+                        <i></i>
+                        
+						<p>{{item.name}}{{index}}</p>
 					</div>
 				</div>
 			</div>
@@ -248,6 +238,7 @@ let template6 =
 Vue.component("t-circle", {
     template: template6,
     name: "t-circle",
+    props: ['title', 'items'],
     data() {
         return {
             attakList: [
@@ -289,22 +280,3 @@ Vue.component("t-header", {
     }
 })
 
-
-let VM = new Vue({
-    el: "#app",
-    data() {
-        return {
-            list: [1, 2]
-        }
-    },
-    created() {
-    },
-    mounted() {
-
-
-    },
-
-
-})
-
- 

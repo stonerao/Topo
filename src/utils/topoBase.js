@@ -54,6 +54,9 @@ export default class Topo extends Base {
             }
         }
         window.addEventListener("resize", this.onWindowResize)
+        var SELECT_IMG = new Image()
+        SELECT_IMG.src = "/assets/image/select_city1.png"
+        this.SELECT_IMG = SELECT_IMG
     }
     _init({
         welgl = 1,
@@ -181,6 +184,86 @@ export default class Topo extends Base {
                 ...linkMesh,
                 color: new THREE.Color("#e17cff"),
             }),
+        }
+    }
+    buildingAnimation(position, radius) {
+        position[1] = 1
+        //选择建筑的动效
+        //建筑升起的特效
+        var routerName = new THREE.Texture(this.SELECT_IMG);
+        routerName.needsUpdate = true;
+        // var geometry = new THREE.CircleBufferGeometry(radius + 50, 32);
+        var geometry = new THREE.PlaneGeometry(radius * 2, radius * 2, 1);
+
+        let height = position[1].toString() * 2 + 400
+        let number = 1;
+        position[0] = position[0];
+        let plane_arr = [];
+        let initPlane = () => {
+            var material = new THREE.MeshBasicMaterial({
+                // color: 0xffff00,
+                side: THREE.DoubleSide,
+                map: routerName
+            });
+            var circle = new THREE.Mesh(geometry, material);
+            circle.position.set(...position)
+            circle.rotation.x = Math.PI / 2
+            circle.material.transparent = true;
+            this.scene.add(circle);
+            return circle
+        }
+        let basePlane = initPlane()
+        basePlane.scale.x = 1.1
+        basePlane.scale.y = 1.1
+        basePlane.scale.z = 1.1
+        function initNode(arr) {
+            if (number == 0) {
+                animation(basePlane)
+                return
+            }
+            let plane = initPlane()
+            animation(plane)
+            setTimeout(() => {
+                number--;
+                initNode()
+            }, 600)
+        }
+        initNode(plane_arr)
+        let _this = this
+        function animation(node) {
+            let num = 0;
+            let scale_num = 0;
+            let scale_time = setInterval(() => {
+                let _n = 1 - scale_num * 0.02
+                if (scale_num > 5) {
+                    clearInterval(scale_time)
+                    _TIME()
+                }
+                node.scale.x = _n
+                node.scale.y = _n
+                node.scale.z = _n
+                scale_num++
+            }, 20)
+            const _TIME = () => {
+                let time = setInterval(() => {
+                    let _NUM = 1 - num / height
+                    let _SCALE = _NUM * 0.1 + 0.9
+                    // node.rotation.z += 0.05;
+                    node.position.y = num;
+                    /* node.scale.x = _SCALE
+                    node.scale.y = _SCALE
+                    node.scale.z = _SCALE */
+                    node.material.opacity = _NUM;
+                    num += 5
+                    if (num >= height) {
+                        clearInterval(time)
+                        setTimeout(() => {
+                            _this.dispose(node)
+                        }, 100)
+                    }
+                }, 20)
+            }
+
         }
     }
     loadImg({ width = 256, height = 256, img }, func) {
@@ -408,7 +491,7 @@ export default class Topo extends Base {
         mesh.params_type = "step"
         this.scene.add(mesh);
 
-        let n = 0; 
+        let n = 0;
         /*  let tim = setInterval(() => {
              n++;
              if (n >= cinum) {
@@ -436,7 +519,7 @@ export default class Topo extends Base {
         //线条动画
         var interval = (n) => {
             if (n >= cinum) {
- 
+
                 let t = setInterval(() => {
                     n--;
                     if (n < 0) {
@@ -494,7 +577,7 @@ export default class Topo extends Base {
     animationFrame() {
         _this.stats.update()
         _this.renderer.render(_this.scene, _this.camera);
-        if (typeof _this.deep == 'number') { 
+        if (typeof _this.deep == 'number') {
             setTimeout(() => {
                 requestAnimationFrame(_this.animationFrame);
             }, _this.deep);

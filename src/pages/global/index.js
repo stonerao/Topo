@@ -2,19 +2,20 @@ import "./index.less";
 import Topo from "../../utils/graph/global"
 import Vue from 'vue/dist/vue.js'
 import "perfect-scrollbar/css/perfect-scrollbar.css";
-import PerfectScrollbar from 'perfect-scrollbar'
-import '../../utils/component'
+import PerfectScrollbar from 'perfect-scrollbar' 
 import types from '../../utils/type.json'
 import graphs from '../../json/topo2.json'
 import axios from '../../utils/axios'
-import GetRequest from '../../utils/full'
-
+import {GetRequest} from '../../utils/full'
+import '../../utils/template'
+ 
 let VM = new Vue({
     el: "#app",
     data() {
         return {
             show: false,
             items: [],
+            mes:"1",
             node: {
                 x: "",
                 y: "",
@@ -38,14 +39,26 @@ let VM = new Vue({
             dsc: "队伍直接图片名，地板=图片名,width,height",
             soketInterVal: null,
             onloadNum: 0,
-            graphs: {}
+            graphs: {},
+            teamTop5:[],
+            levelTop:[],
+            typeTop:[],
+            attackTop5:[],
+            sendInter:null,
+            attackType:1
         }
     },
     created() {
-        this.get(1)
-    },
-
+        let query = GetRequest();
+        if(!query.hasOwnProperty("type"))
+        {
+            return 
+        }
+        this.attackType = query.type
+        this.get(this.attackType)
+    }, 
     mounted() {
+        
         /* this.node = {
             x: 0,
             y: 0,
@@ -174,19 +187,22 @@ let VM = new Vue({
                 this.socket()
             }
         },
-        socket(func) {
-
-            this.ws = new WebSocket(`ws://172.18.0.23/mimic/websocket/global`);
+        socket(func) { 
+            clearInterval(this.sendInter)
+            let url = this.attackType == '1' ? 'normalGlobal' :'normalPlayback'
+            this.ws = new WebSocket(`ws://172.18.0.23/mimic/websocket/` + url);
             this.ws.onopen = () => {
                 // this.ws.send(JSON.stringify({ "unitId": this.unitId.toString() }))
                 // // typeof func == 'function' ? func() : '';
+                this.sendInter = setInterval(() => {
+                    this.ws.send("{'test':'1'}")
+                }, 10000);
             };
             this.ws.onmessage = e => {
                 let data = JSON.parse(e.data)
                 //  str = {"levelTop":[{"name":"3","value":928},{"name":"2","value":0},{"name":"1","value":0}],"path":[{"start":"130","end":"13"},{"start":"102","end":"13"},{"start":"71","end":"10"},{"start":"112","end":"13"},{"start":"144","end":"10"}],"srcTop":[{"name":"team12","value":19},{"name":"team5","value":17},{"name":"team4","value":17},{"name":"team1","value":16},{"name":"team13","value":15}],"typeTop":[{"name":"web扫描","value":353}],"dstTop":[{"name":"白盒拟态路由器","value":193},{"name":"白盒拟态WEB服务器","value":160}]}
                 let { path, srcTop, dstTop, levelTop, typeTop } = data;
-                console.log(path)
-                console.log(this.nodes)
+                console.log(data) 
                 let arr = []
                 path.forEach(x => {
                     let index = 0;
@@ -204,11 +220,21 @@ let VM = new Vue({
                     } 
                     if (obj.hasOwnProperty("src") && obj.hasOwnProperty("dst")) {
                         // arr.push(obj)
+                        topo.buildingAnimation([obj.dst.x, obj.dst.y, obj.dst.z], 50)
                         topo.addLine([obj.src.x, obj.src.y, obj.src.z], [obj.dst.x, obj.dst.y, obj.dst.z], '2-' + path.length%4+'-3')
                     }
                 }) 
                 
-                console.log(arr)
+                // 攻击队伍top5
+                this.teamTop5 = srcTop 
+                // 攻击队伍top5
+                this.attackTop5 = dstTop 
+                // /攻击程度top5
+                this.levelTop = levelTop 
+                // /攻击类型top5
+                this.typeTop = typeTop 
+
+                 
             }
             this.ws.onerror = e => { };
             this.ws.onclose = () => {

@@ -17,26 +17,24 @@
 
 	<link rel="stylesheet" href="./assets/styles/reset.css">
 	<link rel="stylesheet" href="./assets/styles/animate.css">
-	<script type="text/x-template" id="item-template">
-		<ul> 
-			<li>
-				<span @click="cnode(items)" class="cnode">
-					{{items.name}}   
-				</span> 
-				<span class="icon-tree" @click="add(items)">+</span>
-				<span class="icon-tree" @click="del(items)">-</span>
-				<tree-item 
-					@itemdeleteode="itemdeleteode"
-					@itemaddnode="itemaddnode"
-					@clicknode="clcikNode" 
-					class="item" v-for="(item,index) in items.children"  :key="index" :items="item"></tree-item>
-			</li>
-		</ul>
-	</script>
+	 
 </head>
 
 <body>
-	<div id="app"> 
+	<div id="app">
+		<t-header></t-header>   
+		<div class="chart_Group pos_left">
+			<div class="l_group">
+				<l-chart :items="teamTop5" title="攻击队伍TOP5"></l-chart>
+				<l-chart :items="attackTop5" title="攻击目标TOP5"></l-chart>
+			</div> 
+		</div>
+		<div class="pos_right">
+			<div class="r_group">
+				<t-circle title="复杂攻击统计" :items="levelTop"></t-circle>
+			</div>
+			<r-chart title="攻击类型TOP5" :items="typeTop"></r-chart>
+		</div>   
 		<canvas style="width:1000px;height:800px" id="canvas"></canvas>
 	</div>
 

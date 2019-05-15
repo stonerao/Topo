@@ -76,10 +76,21 @@
 
 <body>
 	<div id="app">
-		<div class="samll" id="IFRAM"  >  
-			
-			<iframe height="100%" width="100%" src="/show.html" frameborder="0"></iframe> 
+		<div class="list_Group">
+			<t-rank></t-rank>
 		</div>
+		<div class="list_Group">
+			<l-list></l-list>
+		</div>
+		<div class="list_Step">
+			<r-step></r-step>
+		</div>
+		<b-view>
+				<iframe slot="main" height="100%" width="100%" src="/show.html?type=1" frameborder="0"></iframe>
+		</b-view>
+		
+		</div>
+		 
 		<canvas style="width:1000px;height:800px" id="canvas"></canvas>
 	</div>
 

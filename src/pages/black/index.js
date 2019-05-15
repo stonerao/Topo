@@ -1,12 +1,13 @@
 import "./index.less";
-import Topo from "../../utils/graph/black"
+import Topo from "../../utils/graph/black.js"
 import Vue from 'vue/dist/vue.js'
 import "perfect-scrollbar/css/perfect-scrollbar.css";
 import PerfectScrollbar from 'perfect-scrollbar'
-import '../../utils/component'
 import types from '../../utils/type.json'
 import graphs from '../../json/topo2.json'
 import axios from '../../utils/axios'
+import { GetRequest } from '../../utils/full'
+import '../../utils/template'
 
 let VM = new Vue({
     el: "#app",
@@ -14,6 +15,7 @@ let VM = new Vue({
         return {
             show: false,
             items: [],
+            mes: "1",
             node: {
                 x: "",
                 y: "",
@@ -35,13 +37,27 @@ let VM = new Vue({
             links: [],//连线
             inp_img: "",
             dsc: "队伍直接图片名，地板=图片名,width,height",
-            graph:{}
+            soketInterVal: null,
+            onloadNum: 0,
+            graphs: {},
+            teamTop5: [],
+            levelTop: [],
+            typeTop: [],
+            attackTop5: [],
+            sendInter: null,
+            attackType: 1
         }
     },
     created() {
-        axios("")
+        let query = GetRequest();
+        if (!query.hasOwnProperty("type")) {
+            return
+        }
+        this.attackType = query.type
+        this.get(this.attackType)
     },
     mounted() {
+
         /* this.node = {
             x: 0,
             y: 0,
@@ -74,45 +90,45 @@ let VM = new Vue({
          this.nodes = graphs.nodes;
          this.links = graphs.links;
          this.save() */
-       /*  var graphs = JSON.parse(this.getSaveData())
-        let nodes = graphs.nodes;
-        let links = graphs.links;
-        let get = (data) => {
-            data.forEach(node => {
-                if (node.type == 11) {
-                    console.log(node)
-                    node.children.forEach((x, i) => {
-                        x.x = parseInt(node.x) + i * 30 - 40
-                        x.z = parseInt(node.z) + 80,
-                            x.y = node.y
-                    })
-                }
-                //    links.forEach(x => {
-                //         if (node.id == x.src.id) {
-                //             x.src.x = node.x
-                //             x.src.y = node.y
-                //             x.src.z = node.z
-                //         }
-                //         if (node.id == x.dst.id) {
-                //             x.dst.x = node.x
-                //             x.dst.y = node.y
-                //             x.dst.z = node.z
-                //         }
-                //     }) 
-                if (node.children.length > 0 && Array.isArray(node.children)) {
-                    get(node.children)
-                }
-            })
-        }
-        get(nodes)
-        let n = this.linksHui(graphs)
-        this.links = n.links;
-        this.nodes = n.nodes;
-        this.save() */
-   
-        window.localStorage.setItem("graph", JSON.stringify(graphs))
+        /*  var graphs = JSON.parse(this.getSaveData())
+         let nodes = graphs.nodes;
+         let links = graphs.links;
+         let get = (data) => {
+             data.forEach(node => {
+                 if (node.type == 11) {
+                     console.log(node)
+                     node.children.forEach((x, i) => {
+                         x.x = parseInt(node.x) + i * 30 - 40
+                         x.z = parseInt(node.z) + 80,
+                             x.y = node.y
+                     })
+                 }
+                 //    links.forEach(x => {
+                 //         if (node.id == x.src.id) {
+                 //             x.src.x = node.x
+                 //             x.src.y = node.y
+                 //             x.src.z = node.z
+                 //         }
+                 //         if (node.id == x.dst.id) {
+                 //             x.dst.x = node.x
+                 //             x.dst.y = node.y
+                 //             x.dst.z = node.z
+                 //         }
+                 //     }) 
+                 if (node.children.length > 0 && Array.isArray(node.children)) {
+                     get(node.children)
+                 }
+             })
+         }
+         get(nodes)
+         let n = this.linksHui(graphs)
+         this.links = n.links;
+         this.nodes = n.nodes;
+         this.save() */
+
+        // window.localStorage.setItem("graph", JSON.stringify(graphs))
         setTimeout(() => {
-            this.restore()   
+            // this.restore()   
             /*       this.node = {
                       x: "100",
                       y: "0",
@@ -145,8 +161,97 @@ let VM = new Vue({
 
         }, 3000)
 
+
     },
     methods: {
+        get(id) {
+            axios("/mimic/topology/get", {
+                params: {
+                    id: id
+                }
+            }).then(res => {
+                let { nodes, links } = res.topology;
+                this.graphs = res.topology;
+                this.nodes = this.returnNode(nodes)
+                topo.loadGraph({
+                    nodes: this.nodes,
+                    links: links
+                })
+            })
+        },
+        onload() {
+            console.log(this.onloadNum)
+            if (this.onloadNum == 2) {
+                //全部加载完成
+                this.socket()
+            }
+        },
+        socket(func) {
+            clearInterval(this.sendInter)
+            let url = this.attackType == '2' ? 'additionalGlobal' : 'additionalPlayback'
+            this.ws = new WebSocket(`ws://172.18.0.23/mimic/websocket/` + url);
+            this.ws.onopen = () => {
+                // this.ws.send(JSON.stringify({ "unitId": this.unitId.toString() }))
+                // // typeof func == 'function' ? func() : '';
+                this.sendInter = setInterval(() => {
+                    this.ws.send("{'test':'1'}")
+                }, 10000);
+            };
+            this.ws.onmessage = e => {
+                let data = JSON.parse(e.data)
+                //  str = {"levelTop":[{"name":"3","value":928},{"name":"2","value":0},{"name":"1","value":0}],"path":[{"start":"130","end":"13"},{"start":"102","end":"13"},{"start":"71","end":"10"},{"start":"112","end":"13"},{"start":"144","end":"10"}],"srcTop":[{"name":"team12","value":19},{"name":"team5","value":17},{"name":"team4","value":17},{"name":"team1","value":16},{"name":"team13","value":15}],"typeTop":[{"name":"web扫描","value":353}],"dstTop":[{"name":"白盒拟态路由器","value":193},{"name":"白盒拟态WEB服务器","value":160}]}
+                let { path, srcTop, dstTop, levelTop, typeTop } = data;
+                console.log(data)
+                let arr = []
+                path.forEach(x => {
+                    let index = 0;
+                    let obj = {}
+                    while (index < this.nodes.length) {
+                        let node = this.nodes[index];
+                        if (x.start == node.id) {
+                            obj.src = node;
+                        }
+                        if (x.end == node.id) {
+                            obj.dst = node;
+                        }
+
+                        index++;
+                    }
+                    if (obj.hasOwnProperty("src") && obj.hasOwnProperty("dst")) {
+                        // arr.push(obj)
+                        topo.buildingAnimation([obj.dst.x, obj.dst.y, obj.dst.z], 50)
+                        topo.addLine([obj.src.x, obj.src.y, obj.src.z], [obj.dst.x, obj.dst.y, obj.dst.z], '2-' + path.length % 4 + '-3')
+                    }
+                })
+
+                // 攻击队伍top5
+                this.teamTop5 = srcTop
+                // 攻击队伍top5
+                this.attackTop5 = dstTop
+                // /攻击程度top5
+                this.levelTop = levelTop
+                // /攻击类型top5
+                this.typeTop = typeTop
+
+
+            }
+            this.ws.onerror = e => { };
+            this.ws.onclose = () => {
+                //通道关闭了
+                if (this.ws.readyState == 3) {
+                    //五秒钟后重连
+                    setTimeout(() => {
+                        this.socket();
+                        // this.socket(func());
+                    }, 5000)
+                }
+            };
+        },
+
+        objLoad() {
+            //所有图形加载完毕
+            this.get()
+        },
         linksHui(graphs) {
             let nodes = graphs.nodes;
             let links = graphs.links;
@@ -412,7 +517,7 @@ let VM = new Vue({
             let data = JSON.stringify({
                 nodes: this.nodes,
                 links: this.links
-            }) 
+            })
             window.localStorage.setItem("graph", data)
         },
         getSaveData() {
@@ -457,6 +562,7 @@ let topo = new Topo({
     data: [],
     VUE: VM,
     typeMap: types,
+    // deep: 100,
     cameraPosition: {
         x: 300,
         y: 1800,
