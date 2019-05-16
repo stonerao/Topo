@@ -107,26 +107,26 @@
     },
     {
         "type": "19",
-        "obj": "d-fuwuqi3.obj",
-        "mtl": "d-fuwuqi3.mtl",
+        "obj": "fuwuqi3.obj",
+        "mtl": "fuwuqi3.mtl",
         "name": "附加赛拟态WEB服务器"
     },
     {
         "type": "20",
-        "obj": "d-fuwuqi2.obj",
-        "mtl": "d-fuwuqi2.mtl",
+        "obj": "fuwuqi2.obj",
+        "mtl": "fuwuqi2.mtl",
         "name": "附加赛拟态文件存储服务器"
     },
     {
         "type": "21",
-        "obj": "d-fuwuqi1.obj",
-        "mtl": "d-fuwuqi1.mtl",
+        "obj": "fuwuqi1.obj",
+        "mtl": "fuwuqi1.mtl",
         "name": "附加赛拟态DNS服务器"
     },
     {
         "type": "22",
-        "obj": "d-fanghuoqiang.obj",
-        "mtl": "d-fanghuoqiang.mtl",
+        "obj": "fanghuoqiang.obj",
+        "mtl": "fanghuoqiang.mtl",
         "name": "大防火墙"
     }
 ]

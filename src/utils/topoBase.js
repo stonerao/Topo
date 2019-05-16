@@ -513,7 +513,7 @@ export default class Topo extends Base {
                 y: parseInt(arr[0].y),
                 z: parseInt(arr[0].z) + 1
             }
-            this.animated(src, dst, 1000, () => {
+            this.animated(src, dst, 300, () => {
                 line.advance(new THREE.Vector3(src.x, src.y, src.z))
                 stepTurt.position.set(src.x, src.y, src.z)
             }, () => {

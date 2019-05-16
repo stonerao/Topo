@@ -37,7 +37,7 @@ let template1 = `
     <div class="r_chart">
         <p>{{title}}</p>
         <ul>
-            <li :style="{'opacity':1-index*0.15}" v-for="(item,index) in items" :key="index">
+            <li :style="{'opacity':1-index*0.09}" v-for="(item,index) in items" :key="index">
                 <div >
                     <span class="bar_value">{{item.value}}</span>
                     <span class="bar_name">{{item.name}}</span>
@@ -89,7 +89,7 @@ let template2 = `
             <ul>
                 <li v-for="(item,index) in teams" :class="index==iconIndex?'rankActive':''" @click="clickTeam(item,index)">
                     <img :src="'/assets/image/'+item.small_icon">
-                     
+                    <p class="team-font">{{item.name}}</p>
                 </li>
             </ul>
         </div>
@@ -128,9 +128,9 @@ Vue.component("t-rank", {
 })
 // 左侧威胁列表
 let template3 = `
-    <div class="threat_list" id="threatstep"  radomId="scroll_content">
+    <div class="threat_list"  radomId="scroll_content">
         <p>威胁列表</p>
-        <ul>
+        <ul  id="threatstep"  style="height:580px;position:relative">
             <li  v-for="(item,index) in items" :key="item.id" class="threat_item" :class="threat_id==item.id?'activeList':''" @click="getThreat(item,item.id)">
                 <span class="_time">{{item.date}}</span>
                 <span class="_name">{{item.type}}</span>
@@ -155,22 +155,33 @@ Vue.component("l-list", {
     },
     methods: {
         getThreat(item,index) {
-            this.threatIndex = index;
-            console.log(item)
-            this.$emit("clickthreat", item)
-        },
+            this.threatIndex = index; 
+            this.$emit("clickthreat", item) 
+        } 
 
     },
     mounted() {
         initScroll("#threatstep")
+    },
+    watch:{
+        threat_id(val){
+            let map = this.items.map(x=>x.id) 
+            let num = map.indexOf(val)
+            if (num > 8) { 
+                document.getElementById("threatstep").scrollTop = (num - 8) * 59
+            } else {
+                document.getElementById("threatstep").scrollTop = 0
+            }
+        } 
     }
+
 })
 
 // 右侧威胁步骤
 let template4 = `
-		<div class="step_list"  id="steps" radomId="scroll_content">
+		<div class="step_list"  radomId="scroll_content">
 			<p>威胁步骤</p>
-			<ul id="stepslist">
+			<ul    id="steps" style="height:580px;position:relative">
 				<li v-for="(item,index) in items" :key="item.id" class="step_item" :class="sindex-1==index?'activeStep':''" @click="stepIndex=index">
 					<span class="_num">{{index+1}}</span>
 					<span class="_icon"><img :src="'/assets/image/right/'+item.reference+'.png'"></span>
@@ -199,9 +210,9 @@ Vue.component("r-step", {
     watch: {
         sindex(val) {
             if (val > 8) {
-                document.getElementById("stepslist").style.top = (val - 8) * -59 + "px"
+                document.getElementById("steps").scrollTop = (val - 8) * 59  
             } else {
-                document.getElementById("stepslist").style.top = 0
+                document.getElementById("steps").scrollTop = 0
             }
         }
     }

@@ -73,16 +73,16 @@ let VM = new Vue({
         this.get(this.attackType)
     },
     mounted() {
-
-
+ 
     },
     methods: {
         tableFull() {
             if (this.playType == 2) {
-                this.playType = 1
-                console.log(this.playType)
+                this.playType = 1 
                 this.is_next = false
                 topo.deleteMeshLine()
+                this.deletePlayList(this.threat_id)
+                this.reloadPlayback(this.threat_id)
             }
         },
         clickTreat(item) {
@@ -92,7 +92,7 @@ let VM = new Vue({
             setTimeout(() => {
                 this.is_next = true
                 this.getThreatInformation(item.id)
-            }, 2000)
+            }, 1200)
         },
         get(id) {
             axios("/mimic/topology/get", {
@@ -117,7 +117,9 @@ let VM = new Vue({
                 this.blacksocket()
             }
         },
-
+        clone(data){
+            return JSON.parse(JSON.stringify(data))
+        },
         socket(func) {
             clearInterval(this.sendInter)
             let url = this.attackType == '1' ? 'normalGlobal' : 'additionalGlobal'
@@ -213,16 +215,14 @@ let VM = new Vue({
                     }
                     // window.location.href = "/black.html" + query;
 
-                    this.threatAddlineItem = data.list
-
+                    this.threatAddlineItem = data.list 
                     if (data.list.length == 0) {
-                        this.playType = 1
-                        console.log(this.playType)
+                        this.playType = 1 
                         return
                     } else {
-                        this.playType = 2;
                         setTimeout(() => {
-                            this.loadGlobal(this.threatAddlineItem, 0)
+                            
+                            this.loadGlobal(this.clone(this.threatAddlineItem), 0)
                         }, 2000)
                     }
 
@@ -362,13 +362,14 @@ let VM = new Vue({
                             return
                         }
                         let obj = arr.shift()
+                        this.threat_id=obj.id
                         this.getThreatInformation(obj.id, () => {
                             addline(arr)
                         })
                     }
                     addline(data)
                 })
-            }, 2000)
+            }, 1200)
         },
         getThreatList(id, func) {
             axios("/mimic/threat/getThreatList", {
@@ -389,7 +390,7 @@ let VM = new Vue({
                         icon: res.teamIcon
                     }
                 }
-                typeof func == 'function' ? func(this.threat) : null;
+                typeof func == 'function' ? func(this.clone(this.threat)) : null;
 
             })
         },
@@ -734,7 +735,8 @@ let topo = new Topo({
         this.data[0].position.y = 200;
         //把所有节点映射到Vue上面 
         VM.update(this.data) */
-        VM.currNode = mesh
+        VM.currNode = mesh;
+        console.log(mesh)
         topo.setOption(VM.node, {
             x: VM.currNode.position.x,
             y: VM.currNode.position.y,

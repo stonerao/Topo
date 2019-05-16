@@ -353,8 +353,8 @@ li {
             
             >span{
                 display:block;
-                width:70px;
-                height:70px;
+                min-width:70px;
+                min-height:70px;
                 background-image:url(../../assets/image/chart/4.png);
                 .backImg;
                 margin-right:6px;
@@ -377,7 +377,8 @@ li {
                     text-shadow:1px 1px 4px rgba(0,100,255,1);
                     margin-bottom:6px;
                     position:relative;
-                    &:after{
+                    white-space: pre;
+                   /*  &:after{
                         content:'';
                         display:block;
                         position:absolute;
@@ -389,7 +390,7 @@ li {
                         top:50%;
                         transform:translateY(-50%);
                         right:-15px;
-                    }
+                    } */
                 }
                 ._name{
                     font-size:12px;
@@ -418,8 +419,8 @@ li {
                 display:flex;
                 flex-wrap:wrap;
                 >li{
-                    width:25%;
-                    padding-top:25%;
+                    width:33.33%;
+                    padding-top:13%;
                     position:relative;
                     overflow:hidden;
                     border:1px solid rgba(81,203,255,0.1);
@@ -427,10 +428,10 @@ li {
                     cursor:pointer;
                     >img{
                         position:absolute;
-                        top:50%;
+                        top:40%;
                         left:50%;
                         transform:translate(-50%,-50%);
-                        width:70%;
+                        width:32px;
                     }
                 }
                 .rankActive{
@@ -457,7 +458,7 @@ li {
         // overflow: hidden;
         .threat_list{
             position: relative;
-            height:800px;
+            height:620px;
             >p{
                 font-size:22px;
                 font-family:PingFangSC-Semibold;
@@ -483,9 +484,9 @@ li {
                     &:last-child{
                         margin-bottom:0;
                     }
-                    &:hover{
+                    /* &:hover{
                         transform:scale(1.05);
-                    }
+                    } */
                     >span{
                         font-size:14px;
                         font-family:HelveticaNeue;
@@ -524,7 +525,12 @@ li {
             }
         }
     }
-   
+   .team-font{
+       font-size:14px;
+       text-align: center;
+       color:#fff;
+       line-height: 28px;
+   }
     .list_Step{ 
         position:absolute;
         right:20px;
@@ -559,9 +565,9 @@ li {
                     display:flex;
                     cursor:pointer;
                     transition:transform 0.5s;
-                    &:hover{
+                   /*  &:hover{
                         transform:scale(1.05);
-                    }
+                    } */
                     &:after{
                         margin-bottom:0;
                     }
