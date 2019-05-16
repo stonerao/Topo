@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>网络安全威胁回放</title>
+	<script type="text/javascript" src="./assets/js/three.min.js"></script>
+	<!-- <script type="text/javascript" src="./assets/js/WebGL.js"></script> -->
+	<script type="text/javascript" src="./assets/js/OrbitControls.js"></script>
+	<script type="text/javascript" src="./assets/js/ColladaLoader.js"></script>
+	<script type="text/javascript" src="./assets/js/MTLLoader.js"></script>
+	<script type="text/javascript" src="./assets/js/OBJLoader.js"></script>
+	<script type="text/javascript" src="./assets/js/Stats.js"></script>
+	<script type="text/javascript" src="./assets/js/tween.js"></script>
+	<script type="text/javascript" src="./assets/js/THREE.MeshLine.js"></script>
+
+	<link rel="stylesheet" href="./assets/styles/reset.css">
+	<link rel="stylesheet" href="./assets/styles/animate.css">
+	<script type="text/x-template" id="item-template">
+		<ul> 
+			<li>
+				<span @click="cnode(items)" class="cnode">
+					{{items.name}}   
+				</span> 
+				<span class="icon-tree" @click="add(items)">+</span>
+				<span class="icon-tree" @click="del(items)">-</span>
+				<tree-item 
+					@itemdeleteode="itemdeleteode"
+					@itemaddnode="itemaddnode"
+					@clicknode="clcikNode" 
+					class="item" v-for="(item,index) in items.children"  :key="index" :items="item"></tree-item>
+			</li>
+		</ul>
+	</script>
+</head>
+
+<body>
+	<div id="app">
+		<div class="nodes-main" :class="show?'nodes-active':''">
+			<span class="nodes-show" @click="show=!show">
+				{{show?'展开':'关闭'}}
+			</span>
+			<ul class="nodes-items" id="nodes">
+				<li @click="newNodes(1)">
+					<button>新建节点</button>
+				</li>
+				<tree-item @clicknode="clcikNode" @itemaddnode="itemaddnode" @itemdeleteode="itemdeleteode" class="item"
+					v-for="item in nodes" :key="item.id" :items="item"></tree-item>
+
+			</ul>
+		</div>
+		<ul class="set-position">
+			<li>
+				<div class="p-name">
+					name:
+				</div>
+				<div class="p-inp">
+					<input type="text" v-model="node.name">
+				</div>
+			</li>
+			<li>
+				<div class="p-name">
+					type:
+				</div>
+				<div class="p-inp">
+					<select name="" v-model="node.type" id="">
+						<option v-bind:value="item.type" v-for="item in types" :key="item.type">{{item.name}}</option>
+					</select>
+				</div>
+			</li>
+			<li v-if="node.type==11||node.type==12">
+				<div class="p-name">
+					信息
+				</div>
+				<div class="p-inp">
+					<input type="text" v-model="node.info" :placeholder="dsc">
+				</div>
+			</li>
+			<li>
+				<div class="p-name">
+					x:
+				</div>
+				<div class="p-inp">
+					<input type="number" v-model="node.x">
+				</div>
+			</li>
+			<li>
+				<div class="p-name">
+					y:
+				</div>
+				<div class="p-inp">
+					<input type="number" v-model="node.y">
+				</div>
+			</li>
+			<li>
+				<div class="p-name">
+					z:
+				</div>
+				<div class="p-inp">
+					<input type="number" v-model="node.z">
+				</div>
+			</li>
+			<li>
+				<div class="p-name">
+				</div>
+				<div>
+					<button class="" @click="save_node">保存</button>
+					<button @click="save">存储所有节点</button>
+					<button @click="restore">恢复</button>
+				</div>
+			</li>
+		</ul>
+		<!-- 新建 -->
+		<div class="new-nodes" v-if="is_new">
+			<ul class="new-box">
+				<li>
+					<div class="p-name">
+						name:
+					</div>
+					<div class="p-inp">
+						<input type="text" v-model="node.name">
+					</div>
+				</li>
+				<li>
+					<div class="p-name">
+						type:
+					</div>
+					<div class="p-inp">
+						<select name="" v-model="node.type" id="">
+							<option v-bind:value="item.type" v-for="item in types" :key="item.type">{{item.name}}
+							</option>
+						</select>
+					</div>
+				</li>
+				<li v-if="node.type==11||node.type==12">
+					<div class="p-name">
+						信息
+					</div>
+					<div class="p-inp">
+						<input type="text" v-model="node.info" :placeholder="dsc">
+					</div>
+				</li>
+				<li>
+					<div class="p-name">
+						x:
+					</div>
+					<div class="p-inp">
+						<input type="number" v-model="node.x">
+					</div>
+				</li>
+				<li>
+					<div class="p-name">
+						y:
+					</div>
+					<div class="p-inp">
+						<input type="number" v-model="node.y">
+					</div>
+				</li>
+				<li>
+					<div class="p-name">
+						z:
+					</div>
+					<div class="p-inp">
+						<input type="number" v-model="node.z">
+					</div>
+				</li>
+				<li>
+					<div class="p-name">
+
+					</div>
+					<div>
+						<button class="" @click="new_submit">确认</button>
+						<button @click="is_new=false">关闭</button>
+					</div>
+				</li>
+			</ul>
+
+		</div>
+		<canvas style="width:1000px;height:800px" id="canvas"></canvas>
+	</div>
+
+</body>
+
+</html>

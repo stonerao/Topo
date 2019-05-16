@@ -4,7 +4,6 @@ import Vue from 'vue/dist/vue.js'
 import "perfect-scrollbar/css/perfect-scrollbar.css";
 import PerfectScrollbar from 'perfect-scrollbar'
 import types from '../../utils/type.json'
-import graphs from '../../json/topo2.json'
 import axios from '../../utils/axios'
 import { GetRequest } from '../../utils/full'
 import '../../utils/template'
@@ -40,12 +39,29 @@ let VM = new Vue({
             soketInterVal: null,
             onloadNum: 0,
             graphs: {},
-            teamTop5: [],
-            levelTop: [],
-            typeTop: [],
-            attackTop5: [],
+            teamTop5: [...new Array(5)].map((x, i) => ({})),
+            levelTop: [...new Array(3)].map((x, i) => ({})),
+            typeTop: [...new Array(5)].map((x, i) => ({})),
+            attackTop5: [...new Array(5)].map((x, i) => ({})),
             sendInter: null,
-            attackType: 1
+            attackType: 1,
+            attackType1: 1,
+            ws: null,
+            ws1: null,
+            playType: 2,//1 全局 2回放
+            teams: [],
+            threat: [],
+            threat_id: "",
+            ThreatInformation: [],
+            stepIndex: [],
+            threatAddlineItem: [],
+            team_obj: {
+                name: "",
+                id: "",
+                icon: ""
+            },
+            is_next: true,
+            blackInterval: null
         }
     },
     created() {
@@ -58,112 +74,26 @@ let VM = new Vue({
     },
     mounted() {
 
-        /* this.node = {
-            x: 0,
-            y: 0,
-            z: 0,
-            name: "测试",
-            type: "1",
-            id: this.max_id++
-        }
-
-        setTimeout(() => {
-            this.new_submit()
-        }) */
-        /*  const random = () => {
-             return parseInt(Math.random() * (Math.random() > 0.5 ? 1200 : -1200))
-         }
-         types.forEach(x => {
-             this.nodes.push({
-                 type: x.type,
-                 x: random(),
-                 y: 0,
-                 z: random(),
-                 name: x.name,
-                 id: ++this.max_id,
-                 children: []
-             })
- 
-         })
-         this.save()  */
-        /*  let n = 0;
-         this.nodes = graphs.nodes;
-         this.links = graphs.links;
-         this.save() */
-        /*  var graphs = JSON.parse(this.getSaveData())
-         let nodes = graphs.nodes;
-         let links = graphs.links;
-         let get = (data) => {
-             data.forEach(node => {
-                 if (node.type == 11) {
-                     console.log(node)
-                     node.children.forEach((x, i) => {
-                         x.x = parseInt(node.x) + i * 30 - 40
-                         x.z = parseInt(node.z) + 80,
-                             x.y = node.y
-                     })
-                 }
-                 //    links.forEach(x => {
-                 //         if (node.id == x.src.id) {
-                 //             x.src.x = node.x
-                 //             x.src.y = node.y
-                 //             x.src.z = node.z
-                 //         }
-                 //         if (node.id == x.dst.id) {
-                 //             x.dst.x = node.x
-                 //             x.dst.y = node.y
-                 //             x.dst.z = node.z
-                 //         }
-                 //     }) 
-                 if (node.children.length > 0 && Array.isArray(node.children)) {
-                     get(node.children)
-                 }
-             })
-         }
-         get(nodes)
-         let n = this.linksHui(graphs)
-         this.links = n.links;
-         this.nodes = n.nodes;
-         this.save() */
-
-        // window.localStorage.setItem("graph", JSON.stringify(graphs))
-        setTimeout(() => {
-            // this.restore()   
-            /*       this.node = {
-                      x: "100",
-                      y: "0",
-                      z: "100",
-                      name: "213",
-                      type: "11",
-                      id: "3",
-                      info: "5.png"
-                  }
-                  this.new_submit()
-                 
-*/
-
-            /*   let nodes = graphs.nodes;
-              let links = graphs.links;
-              let index = 0;
-              let get = (data) => {
-                  data.forEach(node => {
-                      if (node.type == 9) {
-                          if (index < 30) {
-                              index++;
-                          }
-                      }
-                      if (node.children.length > 0 && Array.isArray(node.children)) {
-                          get(node.children)
-                      }
-                  })
-              }
-              get(nodes) */
-
-        }, 3000)
-
 
     },
     methods: {
+        tableFull() {
+            if (this.playType == 2) {
+                this.playType = 1
+                console.log(this.playType)
+                this.is_next = false
+                topo.deleteMeshLine()
+            }
+        },
+        clickTreat(item) {
+            this.is_next = false
+            this.threat_id= item.id
+            topo.deleteMeshLine()
+            setTimeout(() => {
+                this.is_next = true
+                this.getThreatInformation(item.id)
+            }, 2000)
+        },
         get(id) {
             axios("/mimic/topology/get", {
                 params: {
@@ -179,15 +109,18 @@ let VM = new Vue({
                 })
             })
         },
-        onload() { 
+        onload() {
             if (this.onloadNum == 2) {
                 //全部加载完成
                 this.socket()
+                this.getTeam();
+                this.blacksocket()
             }
         },
+
         socket(func) {
             clearInterval(this.sendInter)
-            let url = this.attackType == '1' ? 'normalGlobal' : 'additionalPlayback'
+            let url = this.attackType == '1' ? 'normalGlobal' : 'additionalGlobal'
             this.ws = new WebSocket(`ws://172.18.0.23/mimic/websocket/` + url);
             this.ws.onopen = () => {
                 // this.ws.send(JSON.stringify({ "unitId": this.unitId.toString() }))
@@ -197,41 +130,53 @@ let VM = new Vue({
                 }, 10000);
             };
             this.ws.onmessage = e => {
-                let data = JSON.parse(e.data)
-                //  str = {"levelTop":[{"name":"3","value":928},{"name":"2","value":0},{"name":"1","value":0}],"path":[{"start":"130","end":"13"},{"start":"102","end":"13"},{"start":"71","end":"10"},{"start":"112","end":"13"},{"start":"144","end":"10"}],"srcTop":[{"name":"team12","value":19},{"name":"team5","value":17},{"name":"team4","value":17},{"name":"team1","value":16},{"name":"team13","value":15}],"typeTop":[{"name":"web扫描","value":353}],"dstTop":[{"name":"白盒拟态路由器","value":193},{"name":"白盒拟态WEB服务器","value":160}]}
-                let { path, srcTop, dstTop, levelTop, typeTop } = data;
-                console.log(data)
-                let arr = []
-                path.forEach(x => {
-                    let index = 0;
-                    let obj = {}
-                    while (index < this.nodes.length) {
-                        let node = this.nodes[index];
-                        if (x.start == node.id) {
-                            obj.src = node;
+                if (this.playType == 1) {
+                    let data = JSON.parse(e.data)
+                    //  str = {"levelTop":[{"name":"3","value":928},{"name":"2","value":0},{"name":"1","value":0}],"path":[{"start":"130","end":"13"},{"start":"102","end":"13"},{"start":"71","end":"10"},{"start":"112","end":"13"},{"start":"144","end":"10"}],"srcTop":[{"name":"team12","value":19},{"name":"team5","value":17},{"name":"team4","value":17},{"name":"team1","value":16},{"name":"team13","value":15}],"typeTop":[{"name":"web扫描","value":353}],"dstTop":[{"name":"白盒拟态路由器","value":193},{"name":"白盒拟态WEB服务器","value":160}]}
+                    let { path, srcTop, dstTop, levelTop, typeTop } = data;
+                    // let paths = path.filter((x, i) => i < 5)
+                    let arr = []
+                    let indexn = 0;
+                    var addline = (arr) => {
+                        indexn++
+                        if (arr.length == 0) {
+                            return
                         }
-                        if (x.end == node.id) {
-                            obj.dst = node;
+                        let item = arr.shift()
+                        let obj = {}
+                        let index = 0;
+                        while (index < this.nodes.length) {
+                            let node = this.nodes[index];
+                            if (item.start == node.id) {
+                                obj.src = node;
+                            }
+                            if (item.end == node.id) {
+                                obj.dst = node;
+                            }
+                            index++;
                         }
+                        if (obj.hasOwnProperty("src") && obj.hasOwnProperty("dst")) {
+                            // arr.push(obj)  
+                            topo.addLine([obj.src.x, obj.src.y, obj.src.z], [obj.dst.x, obj.dst.y, obj.dst.z], item.type, null, indexn)
 
-                        index++;
+                        }
+                        setTimeout(() => {
+                            if (this.playType == 1) {
+                                addline(arr)
+                            }
+                        }, 180)
                     }
-                    if (obj.hasOwnProperty("src") && obj.hasOwnProperty("dst")) {
-                        // arr.push(obj)
-                        topo.buildingAnimation([obj.dst.x, obj.dst.y, obj.dst.z], 50)
-                        topo.addLine([obj.src.x, obj.src.y, obj.src.z], [obj.dst.x, obj.dst.y, obj.dst.z], '2-' + path.length % 4 + '-3')
-                    }
-                })
-
-                // 攻击队伍top5
-                this.teamTop5 = srcTop
-                // 攻击队伍top5
-                this.attackTop5 = dstTop
-                // /攻击程度top5
-                this.levelTop = levelTop
-                // /攻击类型top5
-                this.typeTop = typeTop
-
+                    addline(path)
+                    // 攻击队伍top5
+                    this.teamTop5 = [...new Array(5)].map((x, i) => srcTop[i] ? srcTop[i] : {})
+                    // 攻击队伍top5
+                    this.attackTop5 = [...new Array(5)].map((x, i) => dstTop[i] ? dstTop[i] : {})
+                    // /攻击程度top5
+                    this.levelTop = levelTop
+                    // /攻击类型top5
+                    this.typeTop = [...new Array(5)].map((x, i) => typeTop[i] ? typeTop[i] : {})
+                } else {
+                }
 
             }
             this.ws.onerror = e => { };
@@ -246,7 +191,226 @@ let VM = new Vue({
                 }
             };
         },
+        blacksocket(func) {
+            clearInterval(this.sendInter1)
+            let url = this.attackType == '1' ? 'normalPlayback' : 'additionalPlayback'
+            this.ws1 = new WebSocket(`ws://172.18.0.23/mimic/websocket/` + url);
+            this.ws1.onopen = () => {
 
+                this.sendInter1 = setInterval(() => {
+                    this.ws1.send("{'test':'1'}")
+                }, 10000);
+            };
+            this.ws1.onmessage = e => {
+                let data = JSON.parse(e.data)
+                //  str = {"levelTop":[{"name":"3","value":928},{"name":"2","value":0},{"name":"1","value":0}],"path":[{"start":"130","end":"13"},{"start":"102","end":"13"},{"start":"71","end":"10"},{"start":"112","end":"13"},{"start":"144","end":"10"}],"srcTop":[{"name":"team12","value":19},{"name":"team5","value":17},{"name":"team4","value":17},{"name":"team1","value":16},{"name":"team13","value":15}],"typeTop":[{"name":"web扫描","value":353}],"dstTop":[{"name":"白盒拟态路由器","value":193},{"name":"白盒拟态WEB服务器","value":160}]}
+                if (this.playType == 1) {
+                    let query = ""
+                    if (this.attackType == 1) {
+                        query = '?type=2&cookie=2'
+                    } else {
+                        query = '?type=4&cookie=2'
+                    }
+                    // window.location.href = "/black.html" + query;
+
+                    this.threatAddlineItem = data.list
+
+                    if (data.list.length == 0) {
+                        this.playType = 1
+                        console.log(this.playType)
+                        return
+                    } else {
+                        this.playType = 2;
+                        setTimeout(() => {
+                            this.loadGlobal(this.threatAddlineItem, 0)
+                        }, 2000)
+                    }
+
+                } else {
+
+                }
+
+            }
+            this.ws1.onerror = e => { };
+            this.ws1.onclose = () => {
+                //通道关闭了
+                if (this.ws1.readyState == 3) {
+                    //五秒钟后重连
+                    setTimeout(() => {
+                        this.blacksocket();
+                        // this.socket(func());
+                    }, 5000)
+                }
+            };
+        },
+        deletePlayList(id) {
+            axios("/mimic/threat/deletePlayList", {
+                params: {
+                    id: id,
+                    topologyId: this.attackType == 1 ? '1' : '2'
+                }
+            }).then(res => {
+
+            })
+        },
+        getAttackLine(steps, func) {
+            this.stepIndex = 0;
+            //开始走攻击线
+            let links = JSON.parse(JSON.stringify(steps))
+            let addLine = (arr) => {
+                if (!this.is_next) {
+                    return
+                }
+                this.stepIndex++;
+                if (arr.length == 0) {
+                    this.deletePlayList(this.threat_id)
+                    this.reloadPlayback(this.threat_id)
+                    // history.go(-1) 
+                    // // this.$refs['iframe'].contentWindow.postMessage('向iframe传的值', '*')
+                    typeof func == 'function' ? func() : null;
+                    return
+                }
+                let obj = arr.shift();
+                let arrs = [];
+                if (obj) {
+                    obj.node_id.forEach(n => {
+                        this.nodes.forEach(node => {
+                            if (n == node.id) {
+                                arrs.push(node)
+                            }
+                        })
+                    })
+                }
+                if (this.is_next) {
+                    topo.addLineBlack(arrs, obj.reference, () => {
+                        if (this.is_next) {
+                            addLine(arr)
+                        }
+                    })
+                }
+            }
+            addLine(links)
+
+        },
+        getTeam(id) {
+            axios("/mimic/team/list").then(res => {
+                this.teams = res.list;
+            })
+        },
+        getThreatInformation(id, func) {
+            axios("/mimic/threat/getThreatInformation", {
+                params: {
+                    id: id,
+                    topologyId: this.attackType == 1 ? '1' : '2'
+                }
+            }).then(res => {
+                // let str = '{"information":[{"date":"2019-05-15 04:46:05","type":"拟态存储漏洞攻击","steps":[{"reference":"2-4-1","name":"资源窃取","node_id":["46","45","14","1","9","10"]},{"reference":"2-2-1","name":"资源窃取","node_id":["33","15","14","13","9","34"]}]}],"ret_code":0}'
+                // res = JSON.parse(str)
+                if (res.ret_code == -1) {
+                    console.log(this.playType)
+                    this.playType = 1;
+                    this.is_next = false;
+                    this.deletePlayList(this.threat_id)
+                    this.reloadPlayback(this.threat_id)
+                    return
+                } else {
+                    this.playType = 2
+                }
+
+                this.ThreatInformation = res.information[0].steps;
+                /*  for (let i = 0; i < 2; i++) {
+                     this.ThreatInformation.push(...res.information[0].steps)
+                 } */
+                if (this.ThreatInformation.length == 0) {
+                    typeof func == 'function' ? func() : null;
+                } else {
+                    this.getAttackLine(this.ThreatInformation, () => {
+                        //所有线条播放完成 
+                        
+                        if (!this.is_next) {
+                            return
+                        }
+                        console.log(111111)
+                        typeof func == 'function' ? func() : null;
+                    })
+                }
+            }).catch(() => {
+                // this.playType=1
+            })
+        },
+        reloadPlayback(id) {
+            axios("/mimic/threat/reloadPlayback", {
+                params: {
+                    topologyId: this.attackType == 1 ? '1' : '2'
+                }
+            })
+        },
+        clickteam(item) {
+            this.is_next = false
+            topo.deleteMeshLine();
+            this.threatAddlineItem = []
+            this.team_obj = {
+                name: item.name,
+                icon: item.small_icon,
+                id: item.team_id
+            }
+            setTimeout(() => {
+                this.is_next = true
+                this.getThreatList(item.team_id, (data) => {
+                    let addline = (arr) => {
+                        if (arr.length == 0) {
+                            return
+                        }
+                        let obj = arr.shift()
+                        this.getThreatInformation(obj.id, () => {
+                            addline(arr)
+                        })
+                    }
+                    addline(data)
+                })
+            }, 2000)
+        },
+        getThreatList(id, func) {
+            axios("/mimic/threat/getThreatList", {
+                params: {
+                    teamId: id,
+                    skip: 0,
+                    amount: 20,
+                    topologyId: this.attackType == 1 ? '1' : '2'
+                }
+            }).then(res => {
+                this.threat = res.list;
+                if (res.list.length == 0) {
+                    return false
+                } else {
+                    this.team_obj = {
+                        name: res.teamName,
+                        id: res.teamId,
+                        icon: res.teamIcon
+                    }
+                }
+                typeof func == 'function' ? func(this.threat) : null;
+
+            })
+        },
+        loadGlobal(item) {
+            // 
+            this.is_next=true
+            if (item.length == 0) {
+                this.playType = 1;
+                return
+            } else {
+                let obj = item.shift()
+                this.getThreatList(obj.teamId)
+                this.threat_id = obj.id;
+                this.getThreatInformation(obj.id, () => {
+                    this.loadGlobal(item)
+                })
+
+            }
+            // let index = 0;
+
+        },
         objLoad() {
             //所有图形加载完毕
             this.get()
@@ -284,6 +448,9 @@ let VM = new Vue({
                         ...node,
                         children: []
                     })
+                    if (node.children == undefined) {
+                        node.children = []
+                    }
                     if (node.children.length > 0 && Array.isArray(node.children)) {
                         get(node.children)
                     }
@@ -300,31 +467,6 @@ let VM = new Vue({
                 nodes: this.returnNode(data.nodes),
                 links: data.links
             })
-            /* 
-            let { nodes, links } = JSON.parse(data)
-            this.nodes = nodes;
-            this.links = links;
-            var getNode = (data) => {
-                if (this.max_id <= data.id) {
-                    this.max_id = parseInt(data.id) + 1
-                }
-                topo.addNodes({
-                    ...data
-                })
-                if (data.children.length != 0) {
-                    data.children.forEach((n, index) => {
-                        setTimeout(() => {
-                            getNode(n);
-                        }, 500)
-                    })
-                }
-                return false
-            }
-            this.nodes.forEach((node, index) => {
-                getNode(node);
-            })
-            topo.updataLink(); */
-
 
         },
         clcikNode(node) {
@@ -380,6 +522,7 @@ let VM = new Vue({
 
 
         },
+
         deleteRelatedLink(id) {
             //删除相关连线
             this.links = this.links.filter(link => {
@@ -407,7 +550,6 @@ let VM = new Vue({
         },
         save_node() {
             let { x, y, z, type, name, id } = this.node;
-            console.log(Object.values(this.node).includes(""))
             /* if (Object.values(this.node).includes("")) {
                 return
             } */
@@ -556,21 +698,20 @@ let topo = new Topo({
     width: window.innerWidth,
     height: window.innerHeight - 5,
     helper: true,
-    controls: true,
-    stats: true,
+    controls: false,
+    stats: false,
     data: [],
     VUE: VM,
     typeMap: types,
     // deep: 100,
     cameraPosition: {
-        x: 300,
-        y: 1800,
-        z: 1800
+        x: 14,
+        y: 861,
+        z: 1901
     },
     click: function (data) {
         let index = 0;
         let mesh = null
-        console.log(JSON.stringify(data[0].point))
         //如果点击的地板 互相关联
         while (index < data.length) {
             if (data[index].object.type == "Mesh") {

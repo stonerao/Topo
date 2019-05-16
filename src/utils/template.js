@@ -78,18 +78,18 @@ let template2 = `
     <div class="rank_group">
         <div class="rank_item" @click="rankShow=!rankShow">
             <span>
-                <!-- <img src="../../assets/image/4.png"> -->
+                <img :data-img="obj.icon" :src="'/assets/image/'+obj.icon" v-if="obj.icon"> 
             </span>
             <div>
-                <span class="_code">{{rankData.code}}</span>
-                <span class="_name">{{rankData.name}}</span>
+                <span class="_code">{{obj.name||"--"}}</span>
+                <span class="_name">队伍名称</span>
             </div>
         </div>
-        <div class="rank_list" v-if="rankShow">
+        <div class="rank_list" v-show="rankShow">
             <ul>
-                <li v-for="(item,index) in teams" :class="index==iconIndex?'rankActive':''" @click="iconIndex=index">
-                    <img :src="item.icon">
-                    <p>{{item.name}}</p>
+                <li v-for="(item,index) in teams" :class="index==iconIndex?'rankActive':''" @click="clickTeam(item,index)">
+                    <img :src="'/assets/image/'+item.small_icon">
+                     
                 </li>
             </ul>
         </div>
@@ -99,7 +99,10 @@ let template2 = `
 Vue.component("t-rank", {
     template: template2,
     name: "t-rank",
-    props: ['teams'],
+    props: {
+        teams: [Array, Object],
+        obj: Object
+    },
     data() {
         return {
             rankData: {
@@ -109,11 +112,15 @@ Vue.component("t-rank", {
             },
             rankList: [],
             iconIndex: 0,
-            rankShow: false
-
+            rankShow: false 
         }
     },
     methods: {
+        clickTeam(item,index){ 
+            this.iconIndex = index;
+            this.$emit("clickteam",item)
+            this.rankShow=false
+        }
     },
     created() {
         this.rankList = icons;
@@ -124,7 +131,7 @@ let template3 = `
     <div class="threat_list" id="threatstep"  radomId="scroll_content">
         <p>威胁列表</p>
         <ul>
-            <li  v-for="(item,index) in items" :key="item.id" class="threat_item" :class="threat_id==item.id?'activeList':''" @click="getThreat(item.id)">
+            <li  v-for="(item,index) in items" :key="item.id" class="threat_item" :class="threat_id==item.id?'activeList':''" @click="getThreat(item,item.id)">
                 <span class="_time">{{item.date}}</span>
                 <span class="_name">{{item.type}}</span>
                 <i v-if="threat_id!=item.id"></i>
@@ -135,23 +142,24 @@ let template3 = `
 Vue.component("l-list", {
     template: template3,
     name: "l-list",
-    props: ['items','threat_id'],
+    props: ['items', 'threat_id'],
     data() {
         return {
             dataList: [
                 { time: '2019-05-06 12:00:00', name: '资源窃取', id: 1 },
                 { time: '2019-05-06 12:00:00', name: '资源窃取', id: 2 },
-                
+
             ],
             threatIndex: 0,
         }
     },
     methods: {
-        getThreat(index) {
+        getThreat(item,index) {
             this.threatIndex = index;
-            this.$emit("clickTreat", index)
+            console.log(item)
+            this.$emit("clickthreat", item)
         },
-         
+
     },
     mounted() {
         initScroll("#threatstep")
@@ -165,7 +173,7 @@ let template4 = `
 			<ul id="stepslist">
 				<li v-for="(item,index) in items" :key="item.id" class="step_item" :class="sindex-1==index?'activeStep':''" @click="stepIndex=index">
 					<span class="_num">{{index+1}}</span>
-					<span class="_icon"><img :src="'/assets/image/'+item.reference+'.png'"></span>
+					<span class="_icon"><img :src="'/assets/image/right/'+item.reference+'.png'"></span>
 					<span class="_step">{{item.name}}</span>
 				</li>
 			</ul>
@@ -174,11 +182,11 @@ let template4 = `
 Vue.component("r-step", {
     template: template4,
     name: "r-step",
-    props: ['items','sindex'],
+    props: ['items', 'sindex'],
     data() {
         return {
             stepList: [
-                
+
             ],
             stepIndex: 0,
         }
@@ -188,11 +196,11 @@ Vue.component("r-step", {
     mounted() {
         initScroll("#steps")
     },
-    watch:{
-        sindex(val){
-            if(val>8){
-                document.getElementById("stepslist").style.top = (val-8)*-59+"px"
-            }else{
+    watch: {
+        sindex(val) {
+            if (val > 8) {
+                document.getElementById("stepslist").style.top = (val - 8) * -59 + "px"
+            } else {
                 document.getElementById("stepslist").style.top = 0
             }
         }
@@ -214,7 +222,7 @@ Vue.component("b-view", {
         }
     },
     methods: {
-        full(){ 
+        full() {
             this.$emit("full")
         }
     },
@@ -264,9 +272,9 @@ Vue.component("t-circle", {
     },
     mounted() {
     },
-    watch:{
-        ['items'](val){
-            this.attakList = val; 
+    watch: {
+        ['items'](val) {
+            this.attakList = val;
         }
     }
 })
