@@ -49,6 +49,7 @@ let VM = new Vue({
             attackType1: 1,
             ws: null,
             ws1: null,
+            is_render: true
         }
     },
     created() {
@@ -60,9 +61,20 @@ let VM = new Vue({
         this.get(this.attackType)
     },
     mounted() {
+        window.addEventListener("message", (e) => {
+            try {
+                let data = JSON.parse(e.data)
+                if (typeof data == 'object') {
+                    if (data.type == 1) {
+                        this.is_render = false
+                    } else if (data.type == 2) {
+                        this.is_render = true
+                    }
+                }
+            } catch (err) {
 
-
-
+            }
+        })
     },
     methods: {
         get(id) {
@@ -84,7 +96,7 @@ let VM = new Vue({
             if (this.onloadNum == 2) {
                 //全部加载完成
                 this.socket()
- 
+
 
             }
         },
@@ -101,6 +113,10 @@ let VM = new Vue({
                 }, 10000);
             };
             this.ws.onmessage = e => {
+                if (!this.is_render) {
+                    console.log("---------")
+                    return
+                }
                 let data = JSON.parse(e.data)
 
                 //  str = {"levelTop":[{"name":"3","value":928},{"name":"2","value":0},{"name":"1","value":0}],"path":[{"start":"130","end":"13"},{"start":"102","end":"13"},{"start":"71","end":"10"},{"start":"112","end":"13"},{"start":"144","end":"10"}],"srcTop":[{"name":"team12","value":19},{"name":"team5","value":17},{"name":"team4","value":17},{"name":"team1","value":16},{"name":"team13","value":15}],"typeTop":[{"name":"web扫描","value":353}],"dstTop":[{"name":"白盒拟态路由器","value":193},{"name":"白盒拟态WEB服务器","value":160}]}
@@ -179,7 +195,7 @@ let VM = new Vue({
                 }
             };
         },
-        
+
         objLoad() {
             //所有图形加载完毕
             this.get()

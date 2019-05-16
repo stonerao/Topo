@@ -32,7 +32,8 @@ export default class Topo extends Base {
             meshLine: []
         }
         this.deep = options.deep || false;
-
+        //是否渲染
+        this.is_render = true
         /* 判断是否有canvas */
         this.canvas = document.querySelector(options.el)
         if (!this.isObject(this.canvas)) {
@@ -117,6 +118,7 @@ export default class Topo extends Base {
         this.camera = new THREE.PerspectiveCamera(45, width / height, 1, 8000);
         //镜头位置 
         this.camera.position.set(...Object.values(cameraPosition))
+        this.camera.rotation.set(-0.4252875677877068, 0.0067756299294785185, 0.0030688507006420523)
         //添加
         this.scene.add(this.camera)
         //是否开启鼠标功能
@@ -175,31 +177,29 @@ export default class Topo extends Base {
                 linecap: 'round', //ignored by WebGLRenderer
                 linejoin: 'round' //ignored by WebGLRenderer
             }),
-            linne_mesh_1: new MeshLineMaterial({
-                ...linkMesh,
+            linne_mesh_1: new MeshLineMaterial({ 
+                ...linkMesh, 
                 color: new THREE.Color("#91FFAA"),
-                ...linkMesh,
-                color: new THREE.Color("#fea053"),
-                dashArray,
+              /*   dashArray,
                 // increment him to animate the dash
                 dashOffset,
                 // 0.5 -> balancing ; 0.1 -> more line : 0.9 -> more void
                 dashRatio: getRandomFloat(0.1, 0.4),
                 // side: DoubleSide,
                 transparent: true,
-                depthWrite: false,
+                depthWrite: false, */
             }),
             linne_mesh_2: new MeshLineMaterial({
                 ...linkMesh,
                 color: new THREE.Color("#fea053"),
-                dashArray,
+              /*   dashArray,
                 // increment him to animate the dash
                 dashOffset,
                 // 0.5 -> balancing ; 0.1 -> more line : 0.9 -> more void
                 dashRatio,
                 // side: DoubleSide,
                 transparent: true,
-                depthWrite: false,
+                depthWrite: false, */
             }),
             linne_mesh_3: new MeshLineMaterial({
                 ...linkMesh,
@@ -418,9 +418,11 @@ export default class Topo extends Base {
         return parseFloat(num)
     }
     deleteMeshLine() {
+        
         this.options.meshLine.forEach(line => {
             this.dispose(line)
         })
+        this.options.meshLine= []
     }
     addLineShowStep(img_code, position) {
         //连线展示开始图标
@@ -471,7 +473,7 @@ export default class Topo extends Base {
         mesh.frustumCulled = false;
         mesh.params_type = "step";
         this.scene.add(mesh)
-        this.options.meshLine.push(mesh)
+        this.options.meshLine.push(mesh)  
         let stepTurt = this.addLineShowStep(reference, [arr[0].x, arr[0].y, arr[0].z])
         let addLine = (arr) => {
             if (arr.length == 1) {
@@ -502,7 +504,7 @@ export default class Topo extends Base {
         }
         addLine(arr)
     }
-    addLine(src, dst, reference, end) {
+    addLine(src, dst, reference, end, index) {
         if (!src || !dst) {
             return
         }
@@ -545,11 +547,10 @@ export default class Topo extends Base {
             (_src.z + _dst.z) / 2
         ]
 
-        let cinum = 60;
-
+        let cinum = 30; 
         var curve = new THREE.CatmullRomCurve3([
             new THREE.Vector3(_src.x, _src.y, _src.z),
-            new THREE.Vector3(_center[0], 200, _center[2]),
+            new THREE.Vector3(_center[0], 200 + index*10, _center[2]),
             new THREE.Vector3(_dst.x, _dst.y, _dst.z),
         ]);
         let vector = curve.getPoints(cinum);
@@ -558,8 +559,8 @@ export default class Topo extends Base {
             geometry.vertices.push(new THREE.Vector3(...src));
         }
         var line = new MeshLine();
-        if (Math.random() > 0.75) {
-            line.setGeometry(geometry, function (p) { return p });
+        line.setGeometry(geometry, function (p) { return p });
+     /*    if (Math.random() > 0.75) {
         } else if (Math.random() > 0.55) {
             line.setGeometry(geometry, function (p) { return 1 - p }); // makes width sinusoidal
         } else if (Math.random() > 0.3) {
@@ -567,37 +568,14 @@ export default class Topo extends Base {
         } else {
             line.setGeometry(geometry)
         }
-
+ */
         var mesh = new THREE.Mesh(line.geometry, mesh_line);
         mesh.frustumCulled = false;
         mesh.params_type = "step"
         this.scene.add(mesh);
 
         let n = 0;
-        /*  let tim = setInterval(() => {
-             n++;
-             if (n >= cinum) {
-                 //终点   
-                 clearInterval(tim)
-                 
-                 setTimeout(() => {
-                     this.dispose(mesh)
-                     vector = null;
-                     cinum = null;
-                     curve = null;
-                     geometry = null;
-                     line = null;
-                     _center = null;
-                     mesh_line = null;
-                     tim = null;
-                     mesh = null;
-                     n = null; 
-                 }, 5000)
-             } else {
-                 line.advance(vector[n])
-             }
- 
-         }, 5) */
+         
         //线条动画
         var interval = (n) => {
             if (n >= cinum) { 
@@ -656,11 +634,20 @@ export default class Topo extends Base {
             },2000)
         }) */
     }
-    animationFrame() {
+    set_rennder(state=true){
+        this.is_render = state;
+        if(!this.is_render){
+            this.deep = 60000
+        }
+    }
+    animationFrame() {  
+        if (_this.is_render){
+            _this.renderer.render(_this.scene, _this.camera);
+        }
         if (_this.stats) {
             _this.stats.update()
         }
-        _this.renderer.render(_this.scene, _this.camera);
+        
         if (typeof _this.deep == 'number') {
             setTimeout(() => {
                 requestAnimationFrame(_this.animationFrame);

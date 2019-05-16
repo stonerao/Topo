@@ -89,11 +89,8 @@
 			<r-step :items="ThreatInformation" :sindex="stepIndex"></r-step>
 		</div>
 		<b-view @full="full" :class="isfull?'active':''">
-			<iframe slot="main" height="100%" width="100%" src="/show.html?type=1" frameborder="0"></iframe>
-		</b-view>
-
-
-
+			<iframe ref="iframe" slot="main" height="100%" width="100%" src="/show.html?type=1" frameborder="0"></iframe>
+		</b-view> 
 		<canvas style="width:1000px;height:800px" id="canvas"></canvas>
 	</div>
 

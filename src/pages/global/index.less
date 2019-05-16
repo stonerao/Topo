@@ -200,7 +200,11 @@ li {
     bottom:0;
     
     
-}.l_chart{
+}
+.over-hidden{
+    overflow: hidden;
+}
+.l_chart{
         margin-bottom:50px;
         &:last-child{
             margin-bottom:0;
@@ -213,12 +217,12 @@ li {
             color:rgba(255,255,255,1);
             line-height:29px;
             text-shadow:1px 1px 4px rgba(0,100,255,1);
-            margin-bottom:10px;
+            margin-bottom:18px;
             white-space:nowrap;
         }
         >ul{
             li{
-                padding:0 15px;
+                padding:0 9px;
                 position:relative;
                 white-space:nowrap;
                 list-style:none;
@@ -254,8 +258,9 @@ li {
                         color:rgba(204,204,204,1);
                         font-size: 13px;
                         display: inline-block;
-                        text-align: right;
-                       padding-right:7px;
+                        // text-align: right;
+                        text-indent:72px;
+                        // padding-right:7px;
                     }
                 }
 
@@ -274,7 +279,7 @@ li {
             color:rgba(255,255,255,1);
             line-height:29px;
             text-shadow:1px 1px 4px rgba(0,100,255,1);
-            margin-bottom:10px;
+            margin-bottom:18px;
             white-space:nowrap;
             text-align:right;
         }
@@ -296,7 +301,7 @@ li {
                     background-image: url(../../assets/image/chart/25.png);
                 }
                 >div{
-                    width:196px;
+                    width:207px;
                     height:23px;
                     background-image: url(../../assets/image/chart/23.png);
                     position: relative;
@@ -320,7 +325,7 @@ li {
                         font-size: 13px;
                         display: inline-block;
                         text-align: left;
-                       padding-right:7px;
+                        padding-right:7px;
                     }
                 }
             }
@@ -440,10 +445,12 @@ li {
     .list_Group{
         height: 80%;
         position:absolute;
-        top:0;
-        left:0;
+        top:114px;
+        left:20px;
+        // overflow: hidden;
         .threat_list{
             position: relative;
+            height:800px;
             >p{
                 font-size:22px;
                 font-family:PingFangSC-Semibold;
@@ -511,9 +518,17 @@ li {
     .list_Step{
         height:70%;
         position:absolute;
-        right:0;
-        top:0;
+        right:20px;
+        top:114px;
+        width:280px;
+          overflow: hidden;
         .step_list{
+            position: absolute;
+            top:0;
+            right:0;
+            bottom:120px;
+            left:40px;
+          
             >p{
                 font-size:22px;
                 font-family:PingFangSC-Semibold;
@@ -524,8 +539,9 @@ li {
                 margin-bottom:10px;
                 text-align:right;
             }
-            >ul{ 
+            >ul{
                 position: relative;
+                transition: all .2s;
                 >li{
                     margin-bottom:15px;
                     height:44px;

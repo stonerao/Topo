@@ -7,13 +7,12 @@ let template = `
     <div class="l_chart">
 		<p>{{title}}</p>
 		<ul>
-			<li v-for="(item,index) in items" :key="index">
+			<li :style="{'opacity':1-index*0.09}" v-for="(item,index) in items" :key="index">
 				<i></i>
-				<div>
+				<div >
 					<span class="bar_value">{{item.value}}</span>
 					<span class="bar_name">{{item.name}}</span>
-				</div>
-				
+				</div> 
 			</li>
 		</ul>
 	</div>
@@ -28,8 +27,7 @@ Vue.component("l-chart", {
         }
     },
     mounted() {
-
-        console.log(this.items)
+        // :style="{'visibility':!item.name?'hidden':''}" 
     },
     methods: {
     }
@@ -39,8 +37,8 @@ let template1 = `
     <div class="r_chart">
         <p>{{title}}</p>
         <ul>
-            <li v-for="(item,index) in items" :key="index">
-                <div>
+            <li :style="{'opacity':1-index*0.15}" v-for="(item,index) in items" :key="index">
+                <div >
                     <span class="bar_value">{{item.value}}</span>
                     <span class="bar_name">{{item.name}}</span>
                 </div>
@@ -68,7 +66,7 @@ Vue.component("r-chart", {
         }
     },
     methods: {
-
+        // :style="{'visibility':!item.name?'hidden':''}"
     },
     mounted() {
         let arr = this.attackList.map(x => x.value);
@@ -268,8 +266,7 @@ Vue.component("t-circle", {
     },
     watch:{
         ['items'](val){
-            this.attakList = val;
-           console.log(val)
+            this.attakList = val; 
         }
     }
 })

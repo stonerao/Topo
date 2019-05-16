@@ -56,7 +56,8 @@ let VM = new Vue({
                 name:"",
                 img:""
             },
-            isfull:false
+            isfull:false,
+            is_render:false
         }
     },
     created() {
@@ -73,7 +74,9 @@ let VM = new Vue({
         }
     },
     mounted() {
-
+        setTimeout(()=>{
+            this.$refs['iframe'].contentWindow.postMessage('{"type":"1"}', '*')
+        },50000)
     },
     methods: {
         full(){ 
@@ -81,15 +84,15 @@ let VM = new Vue({
 
         },
         clickTreat(id) {
-            //点击威胁
-            console.log(id)
+            //点击威胁 
         },
         getThreatList(id) {
             axios("/mimic/threat/getThreatList", {
                 params: {
                     teamId: id,
                     skip: 0,
-                    amount: 20
+                    amount: 20,
+                    topologyId: this.attackType == 2 ? '1' : '2'
                 }
             }).then(res => {
                 this.threat = res.list
@@ -151,7 +154,10 @@ let VM = new Vue({
                 if (arr.length == 0) {
                     this.deletePlayList(this.threat_id)
                     this.reloadPlayback(this.threat_id)
-                    history.go(-1)
+                    // history.go(-1)
+                    this.is_render = false
+                    // // this.$refs['iframe'].contentWindow.postMessage('向iframe传的值', '*')
+                     
                     return
                 }
                 let obj = arr.shift();
@@ -544,6 +550,9 @@ let VM = new Vue({
             }
         },
         ['node.type'](val) {
+        },
+        ['is_render'](val){
+            topo.set_rennder(val)
         }
     }
 })
