@@ -48,7 +48,7 @@ let VM = new Vue({
             attackType1: 1,
             ws: null,
             ws1: null,
-            playType: 2,//1 全局 2回放
+            playType: 1,//1 全局 2回放
             teams: [],
             threat: [],
             threat_id: "",
@@ -73,12 +73,27 @@ let VM = new Vue({
         this.get(this.attackType)
     },
     mounted() {
- 
+
     },
     methods: {
+        teamToTeamId(id) {
+            axios("/mimic/team/logo2id", {
+                params: {
+                    teamLogo: id,
+                    topologyId: this.attackType == 1 ? '1' : '2'
+                }
+            }).then(res=>{
+                this.getThreatList(res.teamId,()=>{
+                    this.playType=2;
+                    this.is_next = false
+                    this.threat_id = item.id
+                    topo.deleteMeshLine()
+                })
+            })
+        },
         tableFull() {
             if (this.playType == 2) {
-                this.playType = 1 
+                this.playType = 1
                 this.is_next = false
                 topo.deleteMeshLine()
                 this.deletePlayList(this.threat_id)
@@ -87,7 +102,7 @@ let VM = new Vue({
         },
         clickTreat(item) {
             this.is_next = false
-            this.threat_id= item.id
+            this.threat_id = item.id
             topo.deleteMeshLine()
             setTimeout(() => {
                 this.is_next = true
@@ -117,7 +132,7 @@ let VM = new Vue({
                 this.blacksocket()
             }
         },
-        clone(data){
+        clone(data) {
             return JSON.parse(JSON.stringify(data))
         },
         socket(func) {
@@ -215,13 +230,13 @@ let VM = new Vue({
                     }
                     // window.location.href = "/black.html" + query;
 
-                    this.threatAddlineItem = data.list 
+                    this.threatAddlineItem = data.list
                     if (data.list.length == 0) {
-                        this.playType = 1 
+                        this.playType = 1
                         return
                     } else {
                         setTimeout(() => {
-                            
+
                             this.loadGlobal(this.clone(this.threatAddlineItem), 0)
                         }, 2000)
                     }
@@ -326,7 +341,7 @@ let VM = new Vue({
                 } else {
                     this.getAttackLine(this.ThreatInformation, () => {
                         //所有线条播放完成 
-                        
+
                         if (!this.is_next) {
                             return
                         }
@@ -362,7 +377,7 @@ let VM = new Vue({
                             return
                         }
                         let obj = arr.shift()
-                        this.threat_id=obj.id
+                        this.threat_id = obj.id
                         this.getThreatInformation(obj.id, () => {
                             addline(arr)
                         })
@@ -396,7 +411,7 @@ let VM = new Vue({
         },
         loadGlobal(item) {
             // 
-            this.is_next=true
+            this.is_next = true
             if (item.length == 0) {
                 this.playType = 1;
                 return
@@ -711,20 +726,26 @@ let topo = new Topo({
         z: 1901
     },
     click: function (data) {
+        if(this.playType==2){
+            return
+
+        }
         let index = 0;
         let mesh = null
         //如果点击的地板 互相关联
         while (index < data.length) {
-            if (data[index].object.type == "Mesh") {
-                mesh = data[index].object;
-                index = data.length
-
-            }
+            let datas = data[index].object;
+            if (datas.datas) {
+                if (datas.datas.type==11){
+                    VM.teamToTeamId(datas.datas.id)
+                    index = data.length 
+                } 
+            } 
             index++;
         }
-        if (mesh == null) {
+        /* if (mesh == null) {
             return
-        }
+        } */
 
         // let mesh = data[0].object.type == "Line" ? data[1]:data[0]
         /* if (mesh.object.type !== "Mesh") {
@@ -735,14 +756,15 @@ let topo = new Topo({
         this.data[0].position.y = 200;
         //把所有节点映射到Vue上面 
         VM.update(this.data) */
-        VM.currNode = mesh;
+        /* VM.currNode = mesh;
         console.log(mesh)
+        
         topo.setOption(VM.node, {
             x: VM.currNode.position.x,
             y: VM.currNode.position.y,
             z: VM.currNode.position.z,
             ...VM.currNode.datas
-        })
+        }) */
 
     }
 }) 

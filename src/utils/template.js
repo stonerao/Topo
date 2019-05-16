@@ -112,14 +112,14 @@ Vue.component("t-rank", {
             },
             rankList: [],
             iconIndex: 0,
-            rankShow: false 
+            rankShow: false
         }
     },
     methods: {
-        clickTeam(item,index){ 
+        clickTeam(item, index) {
             this.iconIndex = index;
-            this.$emit("clickteam",item)
-            this.rankShow=false
+            this.$emit("clickteam", item)
+            this.rankShow = false
         }
     },
     created() {
@@ -130,13 +130,14 @@ Vue.component("t-rank", {
 let template3 = `
     <div class="threat_list"  radomId="scroll_content">
         <p>威胁列表</p>
-        <ul  id="threatstep"  style="height:580px;position:relative">
+        <ul  id="threatstep"  style="height:580px;position:relative" >
+        <div class="not-data" v-if="items.length==0" >暂无数据</div>
             <li  v-for="(item,index) in items" :key="item.id" class="threat_item" :class="threat_id==item.id?'activeList':''" @click="getThreat(item,item.id)">
                 <span class="_time">{{item.date}}</span>
                 <span class="_name">{{item.type}}</span>
                 <i v-if="threat_id!=item.id"></i>
             </li>
-        </ul>
+        </ul> 
     </div>
 `
 Vue.component("l-list", {
@@ -154,25 +155,25 @@ Vue.component("l-list", {
         }
     },
     methods: {
-        getThreat(item,index) {
-            this.threatIndex = index; 
-            this.$emit("clickthreat", item) 
-        } 
+        getThreat(item, index) {
+            this.threatIndex = index;
+            this.$emit("clickthreat", item)
+        }
 
     },
     mounted() {
         initScroll("#threatstep")
     },
-    watch:{
-        threat_id(val){
-            let map = this.items.map(x=>x.id) 
+    watch: {
+        threat_id(val) {
+            let map = this.items.map(x => x.id)
             let num = map.indexOf(val)
-            if (num > 8) { 
+            if (num > 8) {
                 document.getElementById("threatstep").scrollTop = (num - 8) * 59
             } else {
                 document.getElementById("threatstep").scrollTop = 0
             }
-        } 
+        }
     }
 
 })
@@ -181,13 +182,15 @@ Vue.component("l-list", {
 let template4 = `
 		<div class="step_list"  radomId="scroll_content">
 			<p>威胁步骤</p>
-			<ul    id="steps" style="height:580px;position:relative">
+            <ul    id="steps" style="height:580px;position:relative">
+            <div class="not-data" v-if="items.length==0" style="text-align:right">暂无数据</div>
 				<li v-for="(item,index) in items" :key="item.id" class="step_item" :class="sindex-1==index?'activeStep':''" @click="stepIndex=index">
 					<span class="_num">{{index+1}}</span>
 					<span class="_icon"><img :src="'/assets/image/right/'+item.reference+'.png'"></span>
 					<span class="_step">{{item.name}}</span>
 				</li>
-			</ul>
+            </ul>
+            
 		</div>
 `
 Vue.component("r-step", {
@@ -210,7 +213,7 @@ Vue.component("r-step", {
     watch: {
         sindex(val) {
             if (val > 8) {
-                document.getElementById("steps").scrollTop = (val - 8) * 59  
+                document.getElementById("steps").scrollTop = (val - 8) * 59
             } else {
                 document.getElementById("steps").scrollTop = 0
             }

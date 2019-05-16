@@ -353,8 +353,12 @@ li {
             
             >span{
                 display:block;
-                min-width:70px;
-                min-height:70px;
+                @size:52px;
+                min-width:@size;
+                min-height:@size;
+                width:@size;
+                height:@size;
+                margin-top:5px;
                 background-image:url(../../assets/image/chart/4.png);
                 .backImg;
                 margin-right:6px;
@@ -434,8 +438,7 @@ li {
                         width:32px;
                     }
                 }
-                .rankActive{
-                    
+                .rankActive{ 
                     background:rgba(255,176,57,0.24)
                     
                 }
@@ -519,7 +522,8 @@ li {
                 .activeList{
                     background-image:url(../../assets/image/chart/2.png);
                     span{
-                        color:#FFE085
+                        color:#ffc53f;
+                        text-shadow: 1px 1px 4px #ffc53f;
                     }
                 }
             }
@@ -819,4 +823,9 @@ li {
 .attac-type-2{
     cursor: pointer;
     background-image:url("/assets/image/b-attack-1.png");
+}
+.not-data{
+    color:#fff;
+    line-height: 50px;
+      font-family:PingFangSC-Semibold;
 }
