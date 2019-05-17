@@ -321,7 +321,8 @@ let VM = new Vue({
             }).then(res => {
                 // let str = '{"information":[{"date":"2019-05-15 04:46:05","type":"拟态存储漏洞攻击","steps":[{"reference":"2-4-1","name":"资源窃取","node_id":["46","45","14","1","9","10"]},{"reference":"2-2-1","name":"资源窃取","node_id":["33","15","14","13","9","34"]}]}],"ret_code":0}'
                 // res = JSON.parse(str)
-                if (res.ret_code == -1) { 
+                if (res.ret_code == -1) {
+                    console.log(this.playType)
                     this.playType = 1;
                     this.is_next = false;
                     this.deletePlayList(this.threat_id)
@@ -339,10 +340,12 @@ let VM = new Vue({
                     typeof func == 'function' ? func() : null;
                 } else {
                     this.getAttackLine(this.ThreatInformation, () => {
-                        //所有线条播放完成  
+                        //所有线条播放完成 
+
                         if (!this.is_next) {
                             return
-                        } 
+                        }
+                        console.log(111111)
                         typeof func == 'function' ? func() : null;
                     })
                 }
@@ -676,7 +679,10 @@ let VM = new Vue({
         },
         getSaveData() {
             return window.localStorage.getItem("graph")
-        } 
+        },
+        ww(type) {
+
+        }
     },
     watch: {
         is_new(val) {
@@ -689,7 +695,20 @@ let VM = new Vue({
     }
 })
 
- 
+function initScroll(id, state) {
+    let params = {
+        wheelSpeed: 1,
+        wheelPropagation: true,
+        minScrollbarLength: 20,
+        useBothWheelAxes: true
+    }
+    if (state == 'x') {
+        params.suppressScrollY = true
+        params.swipeEasing = true
+    }
+    const ps = new PerfectScrollbar(id, params);
+    return ps
+}
 let topo = new Topo({
     el: "#canvas",
     width: window.innerWidth,
@@ -707,10 +726,12 @@ let topo = new Topo({
         z: 1901
     },
     click: function (data) {
-        if(VM.playType==2){
-            return 
+        if(this.playType==2){
+            return
+
         }
-        let index = 0; 
+        let index = 0;
+        let mesh = null
         //如果点击的地板 互相关联
         while (index < data.length) {
             let datas = data[index].object;
@@ -721,6 +742,29 @@ let topo = new Topo({
                 } 
             } 
             index++;
-        }  
+        }
+        /* if (mesh == null) {
+            return
+        } */
+
+        // let mesh = data[0].object.type == "Line" ? data[1]:data[0]
+        /* if (mesh.object.type !== "Mesh") {
+            return false
+        } */
+
+        /* mesh.object.position.x = 200;
+        this.data[0].position.y = 200;
+        //把所有节点映射到Vue上面 
+        VM.update(this.data) */
+        /* VM.currNode = mesh;
+        console.log(mesh)
+        
+        topo.setOption(VM.node, {
+            x: VM.currNode.position.x,
+            y: VM.currNode.position.y,
+            z: VM.currNode.position.z,
+            ...VM.currNode.datas
+        }) */
+
     }
 }) 

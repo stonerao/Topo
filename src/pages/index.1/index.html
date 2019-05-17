@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>网络安全威胁回放</title>
+	<style>
+		body {
+			background: #000;
+		}
+	</style>
+	<script type="text/javascript" src="./assets/js/three.min.js"></script>
+	<!-- <script type="text/javascript" src="./assets/js/WebGL.js"></script> -->
+	<script type="text/javascript" src="./assets/js/OrbitControls.js"></script>
+	<script type="text/javascript" src="./assets/js/ColladaLoader.js"></script>
+	<script type="text/javascript" src="./assets/js/MTLLoader.js"></script>
+	<script type="text/javascript" src="./assets/js/OBJLoader.js"></script>
+	<script type="text/javascript" src="./assets/js/Stats.js"></script>
+	<script type="text/javascript" src="./assets/js/tween.js"></script>
+	<script type="text/javascript" src="./assets/js/THREE.MeshLine.js"></script>
+
+	<link rel="stylesheet" href="./assets/styles/reset.css">
+	<link rel="stylesheet" href="./assets/styles/animate.css">
+
+</head>
+
+<body style="background:#000">
+	<div id="app">
+		<t-header></t-header>
+		<div v-show="playType==1" :class="playType==1?'animated fadeIn':'animated fadeOut'">
+			<div class="chart_Group pos_left">
+				<div class="l_group">
+					<l-chart :items="teamTop5" title="攻击队伍TOP5"></l-chart>
+					<l-chart :items="attackTop5" title="攻击目标TOP5"></l-chart>
+				</div>
+			</div>
+			<div class="pos_right">
+				<div class="r_group">
+					<t-circle title="复杂攻击统计" :items="levelTop"></t-circle>
+				</div>
+				<r-chart title="攻击类型TOP5" :items="typeTop"></r-chart>
+			</div>
+		</div>
+		<div  v-show="playType==2" :class="playType==2?'animated fadeIn':'animated fadeOut'">
+			<div class="list_Group">
+				<t-rank @clickteam="clickteam" :teams="teams" :obj="team_obj"></t-rank>
+			</div>
+			<div class="list_Group over-hidden">
+				<l-list :items="threat" :threat_id="threat_id" @clickthreat="clickTreat"></l-list>
+			</div>
+			<div class="list_Step">
+				<r-step :items="ThreatInformation" :sindex="stepIndex"></r-step>
+			</div>
+		</div>
+		<div @click="tableFull" :class="playType==1?'attac-type-1':'attac-type-2'" class="attac-type"></div>
+		<canvas style="width:1000px;height:800px" id="canvas"></canvas>
+
+	</div>
+</body>
+
+</html>
