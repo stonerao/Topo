@@ -135,9 +135,12 @@ export default class Topo extends Base {
         this.camera = new THREE.PerspectiveCamera(45, width / height, 1, 8000);
         //镜头位置 
         this.camera.position.set(...Object.values(cameraPosition))
-        this.camera.rotation.set(-0.4252875677877068, 0.0067756299294785185, 0.0030688507006420523)
+        this.camera.rotation.set(-0.5386, 0.0008, 0.00048)
         //添加
         this.scene.add(this.camera)
+       /*  setInterval(()=>{
+            console.log(this.camera)
+        },3000) */
         //是否开启鼠标功能
         if (controls) {
             this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
@@ -324,10 +327,10 @@ export default class Topo extends Base {
         //img 转换 canvas
         let canvas = document.createElement('canvas');
         //导入材质
-        canvas.width = width / 3;
-        canvas.height = height / 3;
+        canvas.width = width  ;
+        canvas.height = height ;
         let context = canvas.getContext("2d");
-        context.drawImage(img, 0, 0, width / 3, height / 3);
+        context.drawImage(img, 0, 0, width  , height  );
         return canvas
     }
     repeatLoadImg({ width = 64, height = 64, conut, img }, func) {

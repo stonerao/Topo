@@ -7,7 +7,8 @@ import types from '../../utils/type.json'
 import axios from '../../utils/axios'
 import { GetRequest } from '../../utils/full'
 import '../../utils/template'
-
+import lock1 from '../../assets/image/loo-1.png'
+import lock2 from '../../assets/image/loo-2.png'
 let VM = new Vue({
     el: "#app",
     data() {
@@ -61,7 +62,15 @@ let VM = new Vue({
                 icon: ""
             },
             is_next: true,
-            blackInterval: null
+            blackInterval: null,
+            fadeInl: "animated fadeInLeft",
+            fadeInr: "animated fadeInRight",
+            fadeOut: "animated fadeOut",
+            selectTeamid: "",
+            host:"",
+            lock:true,
+            lock_1: lock1,
+            lock_2: lock2
         }
     },
     created() {
@@ -69,24 +78,51 @@ let VM = new Vue({
         if (!query.hasOwnProperty("type")) {
             return
         }
+        this.host = query.host ? location.host :"172.18.0.23";
         this.attackType = query.type
         this.get(this.attackType)
+        this.setTimeSend(query)
     },
     mounted() {
 
     },
     methods: {
+        sendEnd(state){
+            this.lock = state;
+            if(state){
+                this.ws1.send('{"send":"true"}')
+            }else{
+                this.ws1.send('{"send":"false"}')
+            }
+        },
+        setTimeSend({date,time}){
+            // 给后台发送时间
+            if(!date&&!time){
+                return
+            }
+            let obj = {};
+            if(date){
+                obj.date = date
+            }
+            if (time){
+                obj.time = time
+            }
+            axios("/mimic/threat/setFilterTime", {
+                params: obj
+            }).then(res => {
+                
+            })
+        },  
         teamToTeamId(id) {
             axios("/mimic/team/logo2id", {
                 params: {
                     teamLogo: id,
                     topologyId: this.attackType == 1 ? '1' : '2'
                 }
-            }).then(res=>{
-                this.getThreatList(res.teamId,()=>{
-                    this.playType=2;
+            }).then(res => {
+                this.getThreatList(res.teamId, () => {
+                    this.playType = 2;
                     this.is_next = false
-                    this.threat_id = item.id
                     topo.deleteMeshLine()
                 })
             })
@@ -118,6 +154,7 @@ let VM = new Vue({
                 let { nodes, links } = res.topology;
                 this.graphs = res.topology;
                 this.nodes = this.returnNode(nodes)
+
                 topo.loadGraph({
                     nodes: this.nodes,
                     links: links
@@ -138,7 +175,7 @@ let VM = new Vue({
         socket(func) {
             clearInterval(this.sendInter)
             let url = this.attackType == '1' ? 'normalGlobal' : 'additionalGlobal'
-            this.ws = new WebSocket(`ws://172.18.0.23/mimic/websocket/` + url);
+            this.ws = new WebSocket(`ws://${this.host}/mimic/websocket/` + url);
             this.ws.onopen = () => {
                 // this.ws.send(JSON.stringify({ "unitId": this.unitId.toString() }))
                 // // typeof func == 'function' ? func() : '';
@@ -211,7 +248,7 @@ let VM = new Vue({
         blacksocket(func) {
             clearInterval(this.sendInter1)
             let url = this.attackType == '1' ? 'normalPlayback' : 'additionalPlayback'
-            this.ws1 = new WebSocket(`ws://172.18.0.23/mimic/websocket/` + url);
+            this.ws1 = new WebSocket(`ws://${this.host}/mimic/websocket/` + url);
             this.ws1.onopen = () => {
 
                 this.sendInter1 = setInterval(() => {
@@ -221,7 +258,7 @@ let VM = new Vue({
             this.ws1.onmessage = e => {
                 let data = JSON.parse(e.data)
                 //  str = {"levelTop":[{"name":"3","value":928},{"name":"2","value":0},{"name":"1","value":0}],"path":[{"start":"130","end":"13"},{"start":"102","end":"13"},{"start":"71","end":"10"},{"start":"112","end":"13"},{"start":"144","end":"10"}],"srcTop":[{"name":"team12","value":19},{"name":"team5","value":17},{"name":"team4","value":17},{"name":"team1","value":16},{"name":"team13","value":15}],"typeTop":[{"name":"web扫描","value":353}],"dstTop":[{"name":"白盒拟态路由器","value":193},{"name":"白盒拟态WEB服务器","value":160}]}
-                if (this.playType == 1) {
+                if (this.playType == 1&&this.lock) {
                     let query = ""
                     if (this.attackType == 1) {
                         query = '?type=2&cookie=2'
@@ -235,8 +272,7 @@ let VM = new Vue({
                         this.playType = 1
                         return
                     } else {
-                        setTimeout(() => {
-
+                        setTimeout(() => { 
                             this.loadGlobal(this.clone(this.threatAddlineItem), 0)
                         }, 2000)
                     }
@@ -321,11 +357,13 @@ let VM = new Vue({
             }).then(res => {
                 // let str = '{"information":[{"date":"2019-05-15 04:46:05","type":"拟态存储漏洞攻击","steps":[{"reference":"2-4-1","name":"资源窃取","node_id":["46","45","14","1","9","10"]},{"reference":"2-2-1","name":"资源窃取","node_id":["33","15","14","13","9","34"]}]}],"ret_code":0}'
                 // res = JSON.parse(str)
-                if (res.ret_code == -1) { 
-                    this.playType = 1;
+                if (res.ret_code == -1) {
+                    // this.playType = 1;
                     this.is_next = false;
                     this.deletePlayList(this.threat_id)
                     this.reloadPlayback(this.threat_id)
+
+                    typeof func == 'function' ? func() : null;
                     return
                 } else {
                     this.playType = 2
@@ -342,7 +380,7 @@ let VM = new Vue({
                         //所有线条播放完成  
                         if (!this.is_next) {
                             return
-                        } 
+                        }
                         typeof func == 'function' ? func() : null;
                     })
                 }
@@ -369,17 +407,19 @@ let VM = new Vue({
             setTimeout(() => {
                 this.is_next = true
                 this.getThreatList(item.team_id, (data) => {
-                    let addline = (arr) => {
+                    this.ThreatInformation = []
+                    /* let addline = (arr) => {
                         if (arr.length == 0) {
                             return
                         }
                         let obj = arr.shift()
                         this.threat_id = obj.id
-                        this.getThreatInformation(obj.id, () => {
-                            addline(arr)
-                        })
+                        
                     }
-                    addline(data)
+                    addline(data) */
+                    /* this.getThreatInformation(obj.id, () => {
+                            // addline(arr)
+                        }) */
                 })
             }, 1200)
         },
@@ -393,6 +433,7 @@ let VM = new Vue({
                 }
             }).then(res => {
                 this.threat = res.list;
+                this.selectTeamid = res.switchId
                 if (res.list.length == 0) {
                     return false
                 } else {
@@ -401,9 +442,9 @@ let VM = new Vue({
                         id: res.teamId,
                         icon: res.teamIcon
                     }
+
                 }
                 typeof func == 'function' ? func(this.clone(this.threat)) : null;
-
             })
         },
         loadGlobal(item) {
@@ -535,7 +576,6 @@ let VM = new Vue({
 
 
         },
-
         deleteRelatedLink(id) {
             //删除相关连线
             this.links = this.links.filter(link => {
@@ -676,7 +716,7 @@ let VM = new Vue({
         },
         getSaveData() {
             return window.localStorage.getItem("graph")
-        } 
+        }
     },
     watch: {
         is_new(val) {
@@ -685,11 +725,26 @@ let VM = new Vue({
             }
         },
         ['node.type'](val) {
+        },
+        ['selectTeamid'](val) {
+            if (val && this.playType == 2) {
+                for (let i = 0; i < this.nodes.length; i++) {
+                    if (this.nodes[i].id == val) {
+                        topo.thingMeshTeam(this.nodes[i])
+                        return
+                    }
+                }
+            }
+        },
+        ['playType'](val) {
+            if (val == 1) {
+                topo.deleteMeshTeam()
+            }
         }
     }
 })
 
- 
+
 let topo = new Topo({
     el: "#canvas",
     width: window.innerWidth,
@@ -702,25 +757,26 @@ let topo = new Topo({
     typeMap: types,
     // deep: 100,
     cameraPosition: {
-        x: 14,
-        y: 861,
-        z: 1901
+        x: 0,
+        y: 1016,
+        z: 1701
     },
     click: function (data) {
-        if(VM.playType==2){
-            return 
+         
+        if (VM.playType == 2) {
+            return
         }
-        let index = 0; 
-        //如果点击的地板 互相关联
+        let index = 0;
+        //如果点击的地板 互相关联 
         while (index < data.length) {
             let datas = data[index].object;
             if (datas.datas) {
-                if (datas.datas.type==11){
+                if (datas.datas.type == 11 || datas.datas.id == 163) {
                     VM.teamToTeamId(datas.datas.id)
-                    index = data.length 
-                } 
-            } 
+                    index = data.length
+                }
+            }
             index++;
-        }  
+        }
     }
 }) 

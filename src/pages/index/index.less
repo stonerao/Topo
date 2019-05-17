@@ -358,6 +358,7 @@ li {
                 min-height:@size;
                 width:@size;
                 height:@size;
+                padding: 12px;
                 margin-top:5px;
                 background-image:url(../../assets/image/chart/4.png);
                 .backImg;
@@ -497,17 +498,17 @@ li {
                         line-height:16px;
                         text-shadow:1px 1px 4px rgba(0,100,255,1);
                         display:block;
-                        text-align:center;
+                        text-align:left;
                         white-space:nowrap;
                         text-overflow:ellipsis;
                         overflow:hidden;
                         font-size:13px;
                     }
                     ._time{
-                        width:50%;
+                        width:35%;
                     }
                     ._name{
-                        width:35%;
+                        width:50%;
                     }
                     >i{
                         width:15%;
@@ -630,6 +631,12 @@ li {
                     }
                     ._step{
                         background-image:url(../../assets/image/chart/13.png);
+                        font-size:14px;
+font-family:HelveticaNeue;
+color:rgba(255,206,75,1); 
+text-shadow:1px 1px 4px rgba(255,193,57,1);
+text-indent:15px;
+text-align: left !important;
                     }
                 }
             }
@@ -807,15 +814,39 @@ li {
     font-family:'font-LED';
     src:url("/assets/font/dig.ttf") format("truetype")
 }
-.attac-type{
-    width:1100px;
-    height:101px;
-    position: absolute;
+.full{
+    position:absolute;
+    top:0;
+    right:0;
+    left:0;
     bottom:0;
-    background-size: 100% auto;
-    left:50%;
-    transform: translateX(-50%);
+}
+.lock-icon{
+    position: relative;
+    top:14px; 
+    left:210px;
+    cursor: pointer;
+    transition:all .2s;
+    &:hover{
+        transform: scale(1.05)
+    }
+}
+.attac-type{
+    width:907px;
+    height:73px;
+ 
+    position: absolute;
+    top:149px;
     
+    left:50%;
+    transform: translateX(-50%); 
+}
+.table_img{
+background-size: 100% auto;
+   background-repeat: no-repeat;
+}
+.lock-icon{
+    position: absolute;
 }
 .attac-type-1{
     background-image:url("/assets/image/b-attack-2.png");

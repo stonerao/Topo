@@ -76,7 +76,7 @@ Vue.component("r-chart", {
 // 顶部队伍列表
 let template2 = `
     <div class="rank_group">
-        <div class="rank_item" @click="rankShow=!rankShow">
+        <div class="rank_item" @click="tab">
             <span>
                 <img :data-img="obj.icon" :src="'/assets/image/'+obj.icon" v-if="obj.icon"> 
             </span>
@@ -85,6 +85,7 @@ let template2 = `
                 <span class="_name">队伍名称</span>
             </div>
         </div>
+       
         <div class="rank_list" v-show="rankShow">
             <ul>
                 <li v-for="(item,index) in teams" :class="index==iconIndex?'rankActive':''" @click="clickTeam(item,index)">
@@ -101,7 +102,9 @@ Vue.component("t-rank", {
     name: "t-rank",
     props: {
         teams: [Array, Object],
-        obj: Object
+        obj: Object,
+        typee: Number,
+        atype: [Number,String],
     },
     data() {
         return {
@@ -116,6 +119,12 @@ Vue.component("t-rank", {
         }
     },
     methods: {
+        tab(){ 
+            if (this.atype == 3 || this.atype==4){
+                return
+            }
+            this.rankShow=!this.rankShow
+        },
         clickTeam(item, index) {
             this.iconIndex = index;
             this.$emit("clickteam", item)
@@ -124,6 +133,21 @@ Vue.component("t-rank", {
     },
     created() {
         this.rankList = icons;
+    },
+    mounted() {
+        window.addEventListener("click", (e) => { 
+            if (this.rankShow&&this.typee==2) {
+                console.log(e.target.nodeName)
+                if (e.target.nodeName == "CANVAS") {
+                    this.rankShow = false
+                }
+            }
+        })
+    },
+    watch: {
+        typee(val) {
+            this.rankShow = false
+        }
     }
 })
 // 左侧威胁列表
@@ -131,11 +155,15 @@ let template3 = `
     <div class="threat_list"  radomId="scroll_content">
         <p>威胁列表</p>
         <ul  id="threatstep"  style="height:580px;position:relative" >
-        <div class="not-data" v-if="items.length==0" >暂无数据</div>
+        
             <li  v-for="(item,index) in items" :key="item.id" class="threat_item" :class="threat_id==item.id?'activeList':''" @click="getThreat(item,item.id)">
                 <span class="_time">{{item.date}}</span>
                 <span class="_name">{{item.type}}</span>
                 <i v-if="threat_id!=item.id"></i>
+            </li>
+            <li   v-if="items.length==0" class="threat_item"> 
+                <span class="_name" style="text-align:left">暂无数据</span>
+                
             </li>
         </ul> 
     </div>
@@ -182,13 +210,18 @@ Vue.component("l-list", {
 let template4 = `
 		<div class="step_list"  radomId="scroll_content">
 			<p>威胁步骤</p>
-            <ul    id="steps" style="height:580px;position:relative">
-            <div class="not-data" v-if="items.length==0" style="text-align:right">暂无数据</div>
+            <ul    id="steps" style="height:580px;position:relative"> 
 				<li v-for="(item,index) in items" :key="item.id" class="step_item" :class="sindex-1==index?'activeStep':''" @click="stepIndex=index">
 					<span class="_num">{{index+1}}</span>
 					<span class="_icon"><img :src="'/assets/image/right/'+item.reference+'.png'"></span>
-					<span class="_step">{{item.name}}</span>
-				</li>
+					<span class="_step" style="text-align:left;text-indent:10px;">{{item.name}}</span>
+                </li>
+				<li  v-if="items.length==0"  class="step_item">
+					<span class="_num">-</span>
+					<span class="_icon" style="color:#51CBFF;font-size:22px">?</span>
+					<span class="_step" style="text-align:left;text-indent:10px;">暂无数据</span>
+                </li>
+                
             </ul>
             
 		</div>

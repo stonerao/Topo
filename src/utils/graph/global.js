@@ -47,6 +47,34 @@ export default class Topo extends Base {
          }) */
 
     }
+    deleteMeshTeam() {
+        //删除选中队伍
+        this.options.data.forEach(node => {
+            if (node.datas.name == "select_team" && node.datas.type == 12) {
+                this.dispose(node)
+            }
+        })
+    }
+    thingMeshTeam(node) {
+        //选中队伍
+        if(this.Vue.attackType==3){
+            return
+        }
+        this.deleteMeshTeam()
+        let z = node.z > 0 ? 722 : -722;
+        let img = node.z >0? "fenzu6.png":"fz-1.png"
+        this.addNodes({
+            x: node.x,
+            y: "0",
+            z: z,
+            name: "select_team",
+            type: "12",
+            id: this.Vue.max_id++,
+            info: img+",130,310,false,1",
+        })
+
+
+    }
     loadGraph(datas) {
         let all_obj = Object.assign({})
         let loadObj = this.typeMap.filter(t => obj_arr.includes(parseInt(t.type)))
@@ -201,18 +229,13 @@ export default class Topo extends Base {
             return plane
         }
         let all_img_end = () => {
-            //所有图片加载完成 
-            /* var group = new THREE.Group();
-            var geometry = new THREE.Geometry() */
             all_img.forEach(node => {
                 let plane = addPlane(node)
-                //   plane.position.x = nodex.x
-                // plane.position.y = nodex.y
-                /*  plane.position.z = 123
-                 plane.updateMatrix(); //手动更新模型的矩阵
- 
-                 geometry.merge(plane.geometry, plane.matrix); //将几何体合并 */
-                // group.add(plane)
+                let state = this.Vue.attackType == 3 || this.Vue.attackType == 4
+                if (node.id == 163 && state) {
+                    plane.rotation.x = -Math.PI / 2 + Math.PI / 4;
+                    plane.position.y += 48
+                }
                 scene.add(plane)
             })
 
@@ -244,50 +267,16 @@ export default class Topo extends Base {
                 }
             }
         })
-        //添加连线
-        /* let LineBasicMaterial = this.Material.line;
-        let addLink = (item)=>{
-            let { src, dst } = item;
-            var geometry = new THREE.Geometry();
-            geometry.vertices.push(
-                new THREE.Vector3(src.x, src.y, src.z),
-                new THREE.Vector3(dst.x, dst.y, dst.z)
-            );
-            var line = new THREE.Line(geometry, LineBasicMaterial);
-            return line
-        } */
+
         links.forEach(link => {
-            /*  let line = addLink(link)
-             line.updateMatrix(); //手动更新模型的矩阵
-             geometry.merge(line.geometry, line.matrix); //将几何体合并 */
             this.addLink(link)
         })
-        //测试连线 
-        /*  let num = 0
-         let time = setInterval(() => { 
-             if (num >= 5) {
-                 clearInterval(time)
-             }
-             let l = links[num]
- 
-             this.addLine1(l)
-             num++
-         }, 3000) */
-        /* let num = 0
-        let time = setInterval(() => {
-            if (num >= links.length) {
-                clearInterval(time)
-            }
-            let l = links[num]
-            this.addLine([l.src.x, l.src.y, l.src.z], [l.dst.x, l.dst.y, -l.dst.z], '1-3-3')
-            num++
-        }, 3000) */
-        // scene.add(new THREE.Mesh(geometry, material));
+
     }
     addTitle(node) {
         //不需要字的地板 
         let info_arr = node.info.split(",")
-        let [twidth, theight] = [info_arr[3].length*32+32, 40]
+        let [twidth, theight] = [info_arr[3].length * 32 + 32, 40]
         let color = info_arr[4] == '1' ? '#ffba47' : '#0094f8'
         let textImg = this.loadText({ width: twidth, height: theight, text: info_arr[3], color: color })
         let routerName = new THREE.Texture(textImg);
@@ -453,24 +442,7 @@ export default class Topo extends Base {
         }
 
 
-        /*  switch (parseInt(type)) {
-             case 1:
-                 
-                 break;
-         }
-  */
-        /* var geometry = new THREE.BoxGeometry(30, 30, 30);
-        var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-        var cube = new THREE.Mesh(geometry, material);
-        cube.position.set(x, y, z);
-        cube.datas = {
-            type: type,
-            name: name,
-            id: id
-        }
-        this.options.data.push(cubew)
-        this.scene.add(cube); */
-        this.updataLink()
+        // this.updataLink()
     }
     addLink(item) {
         //添加连线 
