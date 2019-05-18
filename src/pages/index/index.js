@@ -67,10 +67,16 @@ let VM = new Vue({
             fadeInr: "animated fadeInRight",
             fadeOut: "animated fadeOut",
             selectTeamid: "",
-            host:"",
-            lock:true,
+            host: "",
+            lock: true,
             lock_1: lock1,
-            lock_2: lock2
+            lock_2: lock2,
+            is_data_show: false,
+            sendInter2: null,
+            ws2: null,
+            select_team_arr: [],
+            mode: false,
+            loading: false
         }
     },
     created() {
@@ -78,52 +84,102 @@ let VM = new Vue({
         if (!query.hasOwnProperty("type")) {
             return
         }
-        this.host = query.host ? location.host :"172.18.0.23";
+        if (query.hasOwnProperty("mode")) {
+            this.mode = query.mode
+        }
+
+        this.host = query.host ? location.host : "172.18.0.23";
         this.attackType = query.type
         this.get(this.attackType)
         this.setTimeSend(query)
+
     },
     mounted() {
 
     },
     methods: {
-        sendEnd(state){
+        tabTypeSend() {
+            //全局
+            let _TRUE = '{"send","true"}'
+            let _FALSE = '{"send","false"}'
+            if (this.playType == 1) {
+                if (this.lock) {
+                    // 解锁时，给基础攻击wb和复杂攻击wb都发送{ send: true }
+                    this.ws.send(_TRUE)
+                    this.ws1.send(_TRUE)
+                } else {
+                    // 锁定时，给基础攻击wb发送{send:true}，给复杂攻击wb发送{send:false}
+                    this.ws.send(_TRUE)
+                    this.ws1.send(_FALSE)
+                }
+            } else {
+                //回放
+                // 给基础攻击wb和复杂攻击wb都发送{send:false}
+                this.ws.send(_FALSE)
+                this.ws1.send(_FALSE)
+            }
+        },
+        addHistoyPlan(id) {
+            this.nodes.forEach(node => {
+                if (node.id == id && node.type == 11) {
+                    topo.addNodes({
+                        id: this.max_id++,
+                        x: node.x,
+                        name: "isAddPlan",
+                        y: node.y,
+                        z: node.z,
+                        type: 12,
+                        info: "border.png,70,98,false,1"
+                    })
+                }
+            })
+        },
+        sendEnd(state) {
             this.lock = state;
-            if(state){
+            if (state) {
                 this.ws1.send('{"send":"true"}')
-            }else{
+            } else {
                 this.ws1.send('{"send":"false"}')
             }
         },
-        setTimeSend({date,time}){
+        setTimeSend({ date, time }) {
             // 给后台发送时间
-            if(!date&&!time){
+            if (!date && !time) {
                 return
             }
             let obj = {};
-            if(date){
+            if (date) {
                 obj.date = date
             }
-            if (time){
+            if (time) {
                 obj.time = time
             }
             axios("/mimic/threat/setFilterTime", {
                 params: obj
             }).then(res => {
-                
+
             })
-        },  
+        },
         teamToTeamId(id) {
+            this.loading=true
+            this.selectTeamid = ""
             axios("/mimic/team/logo2id", {
                 params: {
                     teamLogo: id,
                     topologyId: this.attackType == 1 ? '1' : '2'
                 }
             }).then(res => {
-                this.getThreatList(res.teamId, () => {
-                    this.playType = 2;
-                    this.is_next = false
-                    topo.deleteMeshLine()
+                this.getThreatList(res.teamId, (data) => {
+                    if (data.length == 0) {
+                        this.is_data_show = true;
+                        setTimeout(() => {
+                            this.is_data_show = false;
+                        }, 1500)
+                    } else {
+                        this.playType = 2;
+                        this.is_next = false
+                        topo.deleteMeshLine()
+                    }
                 })
             })
         },
@@ -133,7 +189,7 @@ let VM = new Vue({
                 this.is_next = false
                 topo.deleteMeshLine()
                 this.deletePlayList(this.threat_id)
-                this.reloadPlayback(this.threat_id)
+                // this.reloadPlayback(this.threat_id)
             }
         },
         clickTreat(item) {
@@ -143,7 +199,7 @@ let VM = new Vue({
             setTimeout(() => {
                 this.is_next = true
                 this.getThreatInformation(item.id)
-            }, 1200)
+            }, 600)
         },
         get(id) {
             axios("/mimic/topology/get", {
@@ -167,6 +223,7 @@ let VM = new Vue({
                 this.socket()
                 this.getTeam();
                 this.blacksocket()
+                this.teamSocket()
             }
         },
         clone(data) {
@@ -179,6 +236,11 @@ let VM = new Vue({
             this.ws.onopen = () => {
                 // this.ws.send(JSON.stringify({ "unitId": this.unitId.toString() }))
                 // // typeof func == 'function' ? func() : '';
+                if (this.playType == 1) {
+                    this.ws.send('{"send":"true"}')
+                } else {
+                    this.ws.send('{"send":"false"}')
+                }
                 this.sendInter = setInterval(() => {
                     this.ws.send("{'test':'1'}")
                 }, 10000);
@@ -226,7 +288,7 @@ let VM = new Vue({
                     // 攻击队伍top5
                     this.attackTop5 = [...new Array(5)].map((x, i) => dstTop[i] ? dstTop[i] : {})
                     // /攻击程度top5
-                    this.levelTop = levelTop
+                    this.levelTop = [...new Array(3)].map((x, i) => levelTop[i] ? levelTop[i] : {})
                     // /攻击类型top5
                     this.typeTop = [...new Array(5)].map((x, i) => typeTop[i] ? typeTop[i] : {})
                 } else {
@@ -250,7 +312,11 @@ let VM = new Vue({
             let url = this.attackType == '1' ? 'normalPlayback' : 'additionalPlayback'
             this.ws1 = new WebSocket(`ws://${this.host}/mimic/websocket/` + url);
             this.ws1.onopen = () => {
-
+                if (this.playType == 1 && this.lock) {
+                    this.ws1.send('{"send":"true"}')
+                } else {
+                    this.ws1.send('{"send":"false"}')
+                }
                 this.sendInter1 = setInterval(() => {
                     this.ws1.send("{'test':'1'}")
                 }, 10000);
@@ -258,7 +324,7 @@ let VM = new Vue({
             this.ws1.onmessage = e => {
                 let data = JSON.parse(e.data)
                 //  str = {"levelTop":[{"name":"3","value":928},{"name":"2","value":0},{"name":"1","value":0}],"path":[{"start":"130","end":"13"},{"start":"102","end":"13"},{"start":"71","end":"10"},{"start":"112","end":"13"},{"start":"144","end":"10"}],"srcTop":[{"name":"team12","value":19},{"name":"team5","value":17},{"name":"team4","value":17},{"name":"team1","value":16},{"name":"team13","value":15}],"typeTop":[{"name":"web扫描","value":353}],"dstTop":[{"name":"白盒拟态路由器","value":193},{"name":"白盒拟态WEB服务器","value":160}]}
-                if (this.playType == 1&&this.lock) {
+                if (this.playType == 1 && this.lock) {
                     let query = ""
                     if (this.attackType == 1) {
                         query = '?type=2&cookie=2'
@@ -272,7 +338,7 @@ let VM = new Vue({
                         this.playType = 1
                         return
                     } else {
-                        setTimeout(() => { 
+                        setTimeout(() => {
                             this.loadGlobal(this.clone(this.threatAddlineItem), 0)
                         }, 2000)
                     }
@@ -294,7 +360,42 @@ let VM = new Vue({
                 }
             };
         },
+        teamSocket(func) {
+            clearInterval(this.sendInter2)
+            let url = "highlightedTeam"
+            this.ws2 = new WebSocket(`ws://${this.host}/mimic/websocket/` + url);
+            this.ws2.onopen = () => {
+                if (this.attackType == 1) {
+                    this.ws2.send('{"topologyId":1}')
+                } else {
+                    this.ws2.send('{"topologyId":"2}')
+                }
+                this.sendInter2 = setInterval(() => {
+                    this.ws1.send("{'test':'1'}")
+                }, 10000);
+            };
+            this.ws2.onmessage = e => {
+                let data = JSON.parse(e.data)
+                data.newTeam.forEach(node => {
+                    this.select_team_arr.push(node.teamId)
+                    this.addHistoyPlan(node.logId)
+                })
+            }
+            this.ws2.onerror = e => { };
+            this.ws2.onclose = () => {
+                //通道关闭了
+                if (this.ws2.readyState == 3) {
+                    //五秒钟后重连
+                    setTimeout(() => {
+                        this.teamSocket();
+                    }, 5000)
+                }
+            };
+        },
         deletePlayList(id) {
+            if (this.mode != "main") {
+                return
+            }
             axios("/mimic/threat/deletePlayList", {
                 params: {
                     id: id,
@@ -315,7 +416,7 @@ let VM = new Vue({
                 this.stepIndex++;
                 if (arr.length == 0) {
                     this.deletePlayList(this.threat_id)
-                    this.reloadPlayback(this.threat_id)
+                    // this.reloadPlayback(this.threat_id)
                     // history.go(-1) 
                     // // this.$refs['iframe'].contentWindow.postMessage('向iframe传的值', '*')
                     typeof func == 'function' ? func() : null;
@@ -361,7 +462,7 @@ let VM = new Vue({
                     // this.playType = 1;
                     this.is_next = false;
                     this.deletePlayList(this.threat_id)
-                    this.reloadPlayback(this.threat_id)
+                    // this.reloadPlayback(this.threat_id)
 
                     typeof func == 'function' ? func() : null;
                     return
@@ -389,6 +490,9 @@ let VM = new Vue({
             })
         },
         reloadPlayback(id) {
+            if (this.mode != "main") {
+                return
+            }
             axios("/mimic/threat/reloadPlayback", {
                 params: {
                     topologyId: this.attackType == 1 ? '1' : '2'
@@ -397,6 +501,7 @@ let VM = new Vue({
         },
         clickteam(item) {
             this.is_next = false
+            this.loading=true
             topo.deleteMeshLine();
             this.threatAddlineItem = []
             this.team_obj = {
@@ -408,20 +513,8 @@ let VM = new Vue({
                 this.is_next = true
                 this.getThreatList(item.team_id, (data) => {
                     this.ThreatInformation = []
-                    /* let addline = (arr) => {
-                        if (arr.length == 0) {
-                            return
-                        }
-                        let obj = arr.shift()
-                        this.threat_id = obj.id
-                        
-                    }
-                    addline(data) */
-                    /* this.getThreatInformation(obj.id, () => {
-                            // addline(arr)
-                        }) */
                 })
-            }, 1200)
+            }, 600)
         },
         getThreatList(id, func) {
             axios("/mimic/threat/getThreatList", {
@@ -432,9 +525,11 @@ let VM = new Vue({
                     topologyId: this.attackType == 1 ? '1' : '2'
                 }
             }).then(res => {
+                this.loading = false
                 this.threat = res.list;
                 this.selectTeamid = res.switchId
                 if (res.list.length == 0) {
+                    typeof func == 'function' ? func([]) : null;
                     return false
                 } else {
                     this.team_obj = {
@@ -737,6 +832,7 @@ let VM = new Vue({
             }
         },
         ['playType'](val) {
+            this.tabTypeSend()
             if (val == 1) {
                 topo.deleteMeshTeam()
             }
@@ -762,12 +858,12 @@ let topo = new Topo({
         z: 1701
     },
     click: function (data) {
-         
         if (VM.playType == 2) {
             return
         }
         let index = 0;
         //如果点击的地板 互相关联 
+
         while (index < data.length) {
             let datas = data[index].object;
             if (datas.datas) {

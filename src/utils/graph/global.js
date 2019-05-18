@@ -9,43 +9,11 @@ export default class Topo extends Base {
         let { VUE, typeMap } = options;
         this.Vue = VUE;
         this.typeMap = typeMap;
-        /* var geometry = new THREE.BoxGeometry(100, 100, 100);
-        var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-        var cube = new THREE.Mesh(geometry, material);
-        this.scene.add(cube);
 
-        cube.datas = {
-            type: 1,
-            name: 2
-        }
-        this.options.data.push(cube) */
         var light = new THREE.AmbientLight(0xffffff); // soft white light
         this.scene.add(light);
         var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
         this.scene.add(directionalLight);
-        //平铺地板
-        let conut = 120;
-        let wsize = 64;
-        /*  this.repeatLoadImg({
-             width: wsize, height: wsize,
-             conut: conut, img: IMG_SRC + "BG2.png"
-         }, (canvas) => {
-             let routerName = new THREE.Texture(canvas);
-             routerName.needsUpdate = true;
-             let geometry = new THREE.PlaneGeometry(2400, 2400, 6);
-             let material = new THREE.MeshBasicMaterial({ alpha: true, antialias: true, map: routerName, side: THREE.DoubleSide });
-             let plane = new THREE.Mesh(geometry, material);
-          
-             plane.datas = {
-                 type: "footer",
-             }
-             plane.rotation.x = Math.PI / 2;
-             plane.position.y = -2;
-             // plane.position.set(x, y, z);
-             this.scene.add(plane);
-             this.options.data.push(plane);
-         }) */
-
     }
     deleteMeshTeam() {
         //删除选中队伍
@@ -57,12 +25,12 @@ export default class Topo extends Base {
     }
     thingMeshTeam(node) {
         //选中队伍
-        if(this.Vue.attackType==3){
+        if (this.Vue.attackType == 3) {
             return
         }
         this.deleteMeshTeam()
         let z = node.z > 0 ? 722 : -722;
-        let img = node.z >0? "fenzu6.png":"fz-1.png"
+        let img = node.z > 0 ? "fenzu6.png" : "fz-1.png"
         this.addNodes({
             x: node.x,
             y: "0",
@@ -70,7 +38,7 @@ export default class Topo extends Base {
             name: "select_team",
             type: "12",
             id: this.Vue.max_id++,
-            info: img+",130,310,false,1",
+            info: img + ",130,310,false,1",
         })
 
 
@@ -178,8 +146,8 @@ export default class Topo extends Base {
                     img: node.img
                 })
                 p_size = {
-                    width: 367 / 5.5,
-                    height: 496 / 5.5
+                    width: 66,
+                    height: 90
                 }
             } else if (node.type == 12) {
                 let arr = node.info.split(",")
@@ -403,12 +371,26 @@ export default class Topo extends Base {
                             name: name,
                             id: id,
                             info: info
+                        } 
+                        if (name == "isAddPlan") {
+                            //添加plane 
+                            if(z<0){
+                                plane.rotation.x = -Math.PI / 2 + Math.PI / 4;
+                                y = 48
+                                z=eval(z-1)
+                            }else{
+                                plane.rotation.x = -Math.PI / 2 + 0.15;
+                                y = 6
+                            } 
+                            
+                        } else {
+                            plane.rotation.x = Math.PI / 2;
                         }
-                        plane.rotation.x = Math.PI / 2;
                         plane.position.set(x, y, z);
                         scene.add(plane);
                         this.options.data.push(plane);
                     })
+
                     if (info_arr[3] != 'false') {
                         //不需要字的地板 
                         let [twidth, theight] = [256, 64]

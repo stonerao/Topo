@@ -84,11 +84,10 @@ let template2 = `
                 <span class="_code">{{obj.name||"--"}}</span>
                 <span class="_name">队伍名称</span>
             </div>
-        </div>
-       
+        </div> 
         <div class="rank_list" v-show="rankShow">
             <ul>
-                <li v-for="(item,index) in teams" :class="index==iconIndex?'rankActive':''" @click="clickTeam(item,index)">
+                <li :style="{'opacity':selecta.indexOf(item.team_id)==-1?'0.3':'1','cursor':selecta.indexOf(item.team_id)==-1?'no-drop':''}" v-for="(item,index) in teams" :class="{'rankActive':index==iconIndex}"  @click="clickTeam(item,index)">
                     <img :src="'/assets/image/'+item.small_icon">
                     <p class="team-font">{{item.name}}</p>
                 </li>
@@ -104,7 +103,8 @@ Vue.component("t-rank", {
         teams: [Array, Object],
         obj: Object,
         typee: Number,
-        atype: [Number,String],
+        atype: [Number, String],
+        selecta: Array,
     },
     data() {
         return {
@@ -119,13 +119,16 @@ Vue.component("t-rank", {
         }
     },
     methods: {
-        tab(){ 
-            if (this.atype == 3 || this.atype==4){
+        tab() {
+            if (this.atype == 3 || this.atype == 4) {
                 return
             }
-            this.rankShow=!this.rankShow
+            this.rankShow = !this.rankShow
         },
         clickTeam(item, index) {
+            if (this.selecta.indexOf(item.team_id) == -1) {
+                return;
+            }
             this.iconIndex = index;
             this.$emit("clickteam", item)
             this.rankShow = false
@@ -135,9 +138,9 @@ Vue.component("t-rank", {
         this.rankList = icons;
     },
     mounted() {
-        window.addEventListener("click", (e) => { 
-            if (this.rankShow&&this.typee==2) {
-                console.log(e.target.nodeName)
+        window.addEventListener("click", (e) => {
+            if (this.rankShow && this.typee == 2) {
+                console.log(this.selecta)
                 if (e.target.nodeName == "CANVAS") {
                     this.rankShow = false
                 }
@@ -154,12 +157,16 @@ Vue.component("t-rank", {
 let template3 = `
     <div class="threat_list"  radomId="scroll_content">
         <p>威胁列表</p>
-        <ul  id="threatstep"  style="height:580px;position:relative" >
+        <ul  id="threatstep"  style="height:670px;position:relative" >
         
             <li  v-for="(item,index) in items" :key="item.id" class="threat_item" :class="threat_id==item.id?'activeList':''" @click="getThreat(item,item.id)">
-                <span class="_time">{{item.date}}</span>
-                <span class="_name">{{item.type}}</span>
+                <div>
                 <i v-if="threat_id!=item.id"></i>
+                <span class="_time">{{item.date}}</span>
+                </div>
+                <div>
+                <span class="_name">{{item.type}}</span>
+                </div>
             </li>
             <li   v-if="items.length==0" class="threat_item"> 
                 <span class="_name" style="text-align:left">暂无数据</span>
@@ -196,8 +203,8 @@ Vue.component("l-list", {
         threat_id(val) {
             let map = this.items.map(x => x.id)
             let num = map.indexOf(val)
-            if (num > 8) {
-                document.getElementById("threatstep").scrollTop = (num - 8) * 59
+            if (num > 5) {
+                document.getElementById("threatstep").scrollTop = (num - 5) * 59
             } else {
                 document.getElementById("threatstep").scrollTop = 0
             }
@@ -210,13 +217,22 @@ Vue.component("l-list", {
 let template4 = `
 		<div class="step_list"  radomId="scroll_content">
 			<p>威胁步骤</p>
-            <ul    id="steps" style="height:580px;position:relative"> 
+            <ul id="steps" style="height:580px;position:relative"> 
 				<li v-for="(item,index) in items" :key="item.id" class="step_item" :class="sindex-1==index?'activeStep':''" @click="stepIndex=index">
-					<span class="_num">{{index+1}}</span>
-					<span class="_icon"><img :src="'/assets/image/right/'+item.reference+'.png'"></span>
-					<span class="_step" style="text-align:left;text-indent:10px;">{{item.name}}</span>
+					<span class="_num">{{index+1}}</span> 
+                    <div class="_step" style="text-align:left;text-indent:10px;">
+                        <p class="_step_text"> 
+                            <img  class="_step_img":src="'/assets/image/right/'+item.reference+'.png'">
+                            <span>
+                                {{item.name}}
+                            </span>
+                        </p>
+                        <div class="_step_desc" v-html="item.desc"> 
+                            
+                        </div>
+                    </div>
                 </li>
-				<li  v-if="items.length==0"  class="step_item">
+				<li  v-if="items.length==0" class="step_item">
 					<span class="_num">-</span>
 					<span class="_icon" style="color:#51CBFF;font-size:22px">?</span>
 					<span class="_step" style="text-align:left;text-indent:10px;">暂无数据</span>
@@ -245,11 +261,22 @@ Vue.component("r-step", {
     },
     watch: {
         sindex(val) {
-            if (val > 8) {
-                document.getElementById("steps").scrollTop = (val - 8) * 59
-            } else {
-                document.getElementById("steps").scrollTop = 0
-            }
+            let children = document.getElementById("steps").childNodes;
+            let arr = []
+            children.forEach(node => {
+                if (node.nodeName == "LI") {
+                    if (node.className.indexOf("step_item") != -1) {
+                        arr.push(node)
+                    }
+                }
+            })
+            let height = 0;
+            arr.forEach((node) => {
+                height += node.clientHeight+15
+            })
+
+            document.getElementById("steps").scrollTop = height - 580 > 0 ? height - 580 : 0
+
         }
     }
 })
