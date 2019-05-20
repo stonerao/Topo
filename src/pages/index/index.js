@@ -76,7 +76,13 @@ let VM = new Vue({
             ws2: null,
             select_team_arr: [],
             mode: false,
-            loading: false
+            loading: false,
+            is_mouse: false,
+            mouse_position: {
+                left: 0,
+                top: 0
+            },
+            mouse_text: ""
         }
     },
     created() {
@@ -84,14 +90,22 @@ let VM = new Vue({
         if (!query.hasOwnProperty("type")) {
             return
         }
+        // 判断是否有mode字段 
         if (query.hasOwnProperty("mode")) {
             this.mode = query.mode
+            if (query.mode == "main_1") {
+                this.setTimeSend(query)
+            }
         }
-
+        if (query.hasOwnProperty("lock")) {
+            if (query.lock == "true") {
+                this.lock = false
+            }
+        }
         this.host = query.host ? location.host : "172.18.0.23";
         this.attackType = query.type
         this.get(this.attackType)
-        this.setTimeSend(query)
+
 
     },
     mounted() {
@@ -161,7 +175,7 @@ let VM = new Vue({
             })
         },
         teamToTeamId(id) {
-            this.loading=true
+            this.loading = true
             this.selectTeamid = ""
             axios("/mimic/team/logo2id", {
                 params: {
@@ -169,7 +183,7 @@ let VM = new Vue({
                     topologyId: this.attackType == 1 ? '1' : '2'
                 }
             }).then(res => {
-                this.getThreatList(res.teamId, (data) => {
+                this.getThreatList(res.teamId, null, (data) => {
                     if (data.length == 0) {
                         this.is_data_show = true;
                         setTimeout(() => {
@@ -261,21 +275,24 @@ let VM = new Vue({
                         let item = arr.shift()
                         let obj = {}
                         let index = 0;
-                        while (index < this.nodes.length) {
-                            let node = this.nodes[index];
-                            if (item.start == node.id) {
-                                obj.src = node;
+                        if (Array.isArray(item)) {
+                            while (index < this.nodes.length) {
+                                let node = this.nodes[index];
+                                if (item.start == node.id) {
+                                    obj.src = node;
+                                }
+                                if (item.end == node.id) {
+                                    obj.dst = node;
+                                }
+                                index++;
                             }
-                            if (item.end == node.id) {
-                                obj.dst = node;
-                            }
-                            index++;
-                        }
-                        if (obj.hasOwnProperty("src") && obj.hasOwnProperty("dst")) {
-                            // arr.push(obj)  
-                            topo.addLine([obj.src.x, obj.src.y, obj.src.z], [obj.dst.x, obj.dst.y, obj.dst.z], item.type, null, indexn)
+                            if (obj.hasOwnProperty("src") && obj.hasOwnProperty("dst")) {
+                                // arr.push(obj)  
+                                topo.addLine([obj.src.x, obj.src.y, obj.src.z], [obj.dst.x, obj.dst.y, obj.dst.z], item.type, null, indexn)
 
+                            }
                         }
+
                         setTimeout(() => {
                             if (this.playType == 1) {
                                 addline(arr)
@@ -393,7 +410,7 @@ let VM = new Vue({
             };
         },
         deletePlayList(id) {
-            if (this.mode != "main") {
+            if (this.mode != "main_1") {
                 return
             }
             axios("/mimic/threat/deletePlayList", {
@@ -462,18 +479,14 @@ let VM = new Vue({
                     // this.playType = 1;
                     this.is_next = false;
                     this.deletePlayList(this.threat_id)
-                    // this.reloadPlayback(this.threat_id)
-
+                    // this.reloadPlayback(this.threat_id) 
                     typeof func == 'function' ? func() : null;
                     return
                 } else {
                     this.playType = 2
                 }
-
                 this.ThreatInformation = res.information[0].steps;
-                /*  for (let i = 0; i < 2; i++) {
-                     this.ThreatInformation.push(...res.information[0].steps)
-                 } */
+
                 if (this.ThreatInformation.length == 0) {
                     typeof func == 'function' ? func() : null;
                 } else {
@@ -490,7 +503,7 @@ let VM = new Vue({
             })
         },
         reloadPlayback(id) {
-            if (this.mode != "main") {
+            if (this.mode != "main_1") {
                 return
             }
             axios("/mimic/threat/reloadPlayback", {
@@ -501,7 +514,7 @@ let VM = new Vue({
         },
         clickteam(item) {
             this.is_next = false
-            this.loading=true
+            this.loading = true
             topo.deleteMeshLine();
             this.threatAddlineItem = []
             this.team_obj = {
@@ -511,18 +524,23 @@ let VM = new Vue({
             }
             setTimeout(() => {
                 this.is_next = true
-                this.getThreatList(item.team_id, (data) => {
+                this.getThreatList(item.team_id, null, (data) => {
                     this.ThreatInformation = []
                 })
             }, 600)
         },
-        getThreatList(id, func) {
+        getThreatList(id, mid, func) {
+            let obj = {}
+            if (mid) {
+                obj.mongoId = mid
+            }
             axios("/mimic/threat/getThreatList", {
                 params: {
                     teamId: id,
                     skip: 0,
                     amount: 20,
-                    topologyId: this.attackType == 1 ? '1' : '2'
+                    topologyId: this.attackType == 1 ? '1' : '2',
+                    ...obj
                 }
             }).then(res => {
                 this.loading = false
@@ -550,10 +568,11 @@ let VM = new Vue({
                 return
             } else {
                 let obj = item.shift()
-                this.getThreatList(obj.teamId)
                 this.threat_id = obj.id;
-                this.getThreatInformation(obj.id, () => {
-                    this.loadGlobal(item)
+                this.getThreatList(obj.teamId, obj.id,() => {
+                    this.getThreatInformation(obj.id, () => {
+                        this.loadGlobal(item)
+                    })
                 })
 
             }
@@ -835,7 +854,13 @@ let VM = new Vue({
             this.tabTypeSend()
             if (val == 1) {
                 topo.deleteMeshTeam()
+                this.ThreatInformation = []
+                this.stepIndex = 0;
+                this.threat_id = ""
             }
+        },
+        threat_id(val) {
+            console.log(val)
         }
     }
 })
@@ -858,12 +883,11 @@ let topo = new Topo({
         z: 1701
     },
     click: function (data) {
-        if (VM.playType == 2) {
+        /* if (VM.playType == 2) {
             return
-        }
+        } */
         let index = 0;
-        //如果点击的地板 互相关联 
-
+        //如果点击的地板 互相关联  
         while (index < data.length) {
             let datas = data[index].object;
             if (datas.datas) {
@@ -873,6 +897,32 @@ let topo = new Topo({
                 }
             }
             index++;
+        }
+    },
+    mouse: function (data, event) {
+
+        let obj = data.filter(node => {
+            if (node.object.datas) {
+                if (node.object.datas.type == 11) {
+                    return true
+                }
+            }
+            return false
+        })
+        if (obj.length == 0) {
+            VM.is_mouse = false
+            return
+        }
+        let datas = obj[0].object.datas;
+        if (datas) {
+            if (datas.type == 11) {
+                VM.is_mouse = true
+                VM.mouse_text = VM.teams.filter(x => x.icon == datas.info)[0].name
+                VM.mouse_position = {
+                    left: event.pageX + 20 + "px",
+                    top: event.pageY + "px"
+                }
+            }
         }
     }
 }) 

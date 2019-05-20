@@ -29,7 +29,8 @@ export default class Topo extends Base {
             click: null,
             data: [],//存储所有添加的节点
             links: [],
-            meshLine: []
+            meshLine: [],
+            mouse: options.mouse
         }
         this.deep = options.deep || false;
         //是否渲染
@@ -48,13 +49,15 @@ export default class Topo extends Base {
         //是否需要点击
         if (this.hasOwn(options, "click")) {
             if (typeof options['click'] === "function") {
-                this.setOption(this.options, {
-                    click: options.click
+                this.setOption(this.options, {  
+                    click: options.click 
+                    
                 })
 
                 this.canvas.addEventListener("mouseup", this.click)
             }
         }
+        this.canvas.addEventListener("mousemove", this.mousemove)
         window.addEventListener("resize", this.onWindowResize)
         var SELECT_IMG = new Image()
         SELECT_IMG.src = "/assets/image/select_city1.png"
@@ -130,7 +133,7 @@ export default class Topo extends Base {
         // this.renderer.setClearColor(background, 1);
         //场景
         this.scene = new THREE.Scene()
-    
+
         //透视相机
         this.camera = new THREE.PerspectiveCamera(45, width / height, 1, 8000);
         //镜头位置 
@@ -138,9 +141,9 @@ export default class Topo extends Base {
         this.camera.rotation.set(-0.5386, 0.0008, 0.00048)
         //添加
         this.scene.add(this.camera)
-       /*  setInterval(()=>{
-            console.log(this.camera)
-        },3000) */
+        /*  setInterval(()=>{
+             console.log(this.camera)
+         },3000) */
         //是否开启鼠标功能
         if (controls) {
             this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
@@ -231,19 +234,32 @@ export default class Topo extends Base {
             }),
             linne_mesh_5: new MeshLineMaterial({
                 ...linkMesh,
-                color: new THREE.Color("#007AFF"),
+                color: new THREE.Color("#A0F0FF"),
             }),
             linne_mesh_6: new MeshLineMaterial({
                 ...linkMesh,
-                color: new THREE.Color("#671AFF"),
+                color: new THREE.Color("#009DFF"),
             }),
             linne_mesh_7: new MeshLineMaterial({
                 ...linkMesh,
-                color: new THREE.Color("#DD31D0"),
+                color: new THREE.Color("#FFD030"),
             }),
             linne_mesh_8: new MeshLineMaterial({
                 ...linkMesh,
-                color: new THREE.Color("#F7101F"),
+                color: new THREE.Color("#FF7410"),
+            })
+            , linne_mesh_9: new MeshLineMaterial({
+                ...linkMesh,
+                color: new THREE.Color("#FF0053"),
+                dashArray,
+                // increment him to animate the dash
+                dashOffset,
+                // 0.5 -> balancing ; 0.1 -> more line : 0.9 -> more void
+                dashRatio: getRandomFloat(0.1, 0.4),
+                // side: DoubleSide,
+                transparent: true,
+                depthWrite: false,
+                lineWidth: 20
             }),
         }
     }
@@ -257,12 +273,12 @@ export default class Topo extends Base {
         position[0] = position[0];
         let plane_arr = [];
 
-      /*   let basePlane = this.buildBox.clone()
-        basePlane.position.set(...position)
-        basePlane.scale.x = 1.1
-        basePlane.scale.y = 1.1
-        basePlane.scale.z = 1.1
-        this.scene.add(basePlane) */
+        /*   let basePlane = this.buildBox.clone()
+          basePlane.position.set(...position)
+          basePlane.scale.x = 1.1
+          basePlane.scale.y = 1.1
+          basePlane.scale.z = 1.1
+          this.scene.add(basePlane) */
         var initNode = (arr) => {
             if (number == 0) {
                 // animation(basePlane)
@@ -295,8 +311,8 @@ export default class Topo extends Base {
             }, 40)
             const _TIME = () => {
                 let time = setInterval(() => {
-                    let _NUM = 1 - num / height 
-                    node.position.y = num; 
+                    let _NUM = 1 - num / height
+                    node.position.y = num;
                     node.material.opacity = _NUM;
                     num += 5
                     if (num >= height) {
@@ -327,10 +343,10 @@ export default class Topo extends Base {
         //img 转换 canvas
         let canvas = document.createElement('canvas');
         //导入材质
-        canvas.width = width  ;
-        canvas.height = height ;
+        canvas.width = width;
+        canvas.height = height;
         let context = canvas.getContext("2d");
-        context.drawImage(img, 0, 0, width  , height  );
+        context.drawImage(img, 0, 0, width, height);
         return canvas
     }
     repeatLoadImg({ width = 64, height = 64, conut, img }, func) {
@@ -404,6 +420,34 @@ export default class Topo extends Base {
 
         }
         this.scene.remove(mesh)
+    }
+    mousemove(event) {
+        var raycaster = new THREE.Raycaster()
+        let mouse = new THREE.Vector2();
+        let x, y;
+        if (event.changedTouches) {
+            x = event.changedTouches[0].pageX;
+            y = event.changedTouches[0].pageY;
+
+        } else {
+            x = event.clientX;
+            y = event.clientY;
+        }
+        mouse.x = (x / window.innerWidth) * 2 - 1;
+        mouse.y = -(y / window.innerHeight) * 2 + 1;
+        raycaster.setFromCamera(mouse, _this.camera);
+        let intersects = raycaster.intersectObjects([_this.scene], true);
+        if (intersects.length > 0) { 
+            _this.options.mouse(intersects, event)
+            /*  switch (event.button) {
+                 case 0:
+                     //左键  
+                     break;
+                 case 2:
+                     //右键
+                     break;
+             } */
+        }
     }
     click(event) {
         var raycaster = new THREE.Raycaster()
@@ -495,7 +539,7 @@ export default class Topo extends Base {
         this.options.meshLine.push(mesh)
         let stepTurt = this.addLineShowStep(reference, [arr[0].x, arr[0].y, arr[0].z])
         let addLine = (arr) => {
-            if (!this.Vue.is_next){
+            if (!this.Vue.is_next) {
                 return
             }
             if (arr.length == 1) {
@@ -558,8 +602,10 @@ export default class Topo extends Base {
             case "3":
                 mesh_line = this.Material.linne_mesh_7
                 break
-            default:
+            case "4":
                 mesh_line = this.Material.linne_mesh_8
+            default:
+                mesh_line = this.Material.linne_mesh_9
 
         }
 
@@ -570,9 +616,10 @@ export default class Topo extends Base {
         ]
 
         let cinum = 30;
+        let _yheight = index % 30 * 10;
         var curve = new THREE.CatmullRomCurve3([
             new THREE.Vector3(_src.x, _src.y, _src.z),
-            new THREE.Vector3(_center[0], 200 + index * 10, _center[2]),
+            new THREE.Vector3(_center[0], 200 + _yheight, _center[2]),
             new THREE.Vector3(_dst.x, _dst.y, _dst.z),
         ]);
         let vector = curve.getPoints(cinum);
@@ -591,6 +638,7 @@ export default class Topo extends Base {
                line.setGeometry(geometry)
            }
     */
+
         var mesh = new THREE.Mesh(line.geometry, mesh_line);
         mesh.frustumCulled = false;
         mesh.params_type = "step"

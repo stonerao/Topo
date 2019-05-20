@@ -263,7 +263,7 @@ Vue.component("r-step", {
         sindex(val) {
             let children = document.getElementById("steps").childNodes;
             let arr = []
-            children.forEach(node => {
+            children.forEach((node, i) => {
                 if (node.nodeName == "LI") {
                     if (node.className.indexOf("step_item") != -1) {
                         arr.push(node)
@@ -271,10 +271,12 @@ Vue.component("r-step", {
                 }
             })
             let height = 0;
-            arr.forEach((node) => {
-                height += node.clientHeight+15
-            })
+            arr.forEach((node, index) => {
+                if (index <= val) {
 
+                    height += node.clientHeight + 15
+                }
+            })
             document.getElementById("steps").scrollTop = height - 580 > 0 ? height - 580 : 0
 
         }
@@ -384,7 +386,8 @@ function initScroll(id, state) {
         wheelSpeed: 1,
         wheelPropagation: true,
         minScrollbarLength: 20,
-        useBothWheelAxes: true
+        useBothWheelAxes: true,
+        
     }
     if (state == 'x') {
         params.suppressScrollY = true
