@@ -6,6 +6,10 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>网络安全威胁回放</title>
 	<style>
+		.dn {
+			display: none;
+		}
+
 		body {
 			background: #000;
 		}
@@ -14,8 +18,8 @@
 			color: official;
 			display: inline-block;
 			position: absolute;
-			right:20px;
-			top:20px;
+			right: 20px;
+			top: 20px;
 			width: 64px;
 			height: 64px;
 			transform: scale(0.7);
@@ -108,7 +112,6 @@
 				opacity: 0;
 			}
 		}
-		 
 	</style>
 	<script type="text/javascript" src="./assets/js/three.min.js"></script>
 	<!-- <script type="text/javascript" src="./assets/js/WebGL.js"></script> -->
@@ -126,7 +129,7 @@
 </head>
 
 <body style="background:#000;overflow: hidden">
-	<div id="app" style="overflow: hidden">
+	<div id="app" style="overflow: hidden" class="dn" :style="showBody">
 		<t-header></t-header>
 		<div v-show="playType==1">
 			<div class="chart_Group pos_left">
@@ -139,7 +142,7 @@
 				<div class="r_group">
 					<t-circle title="复杂攻击统计" :items="levelTop"></t-circle>
 				</div>
-				<r-chart title="攻击类型TOP5" :items="typeTop"></r-chart>
+				<r-chart title="基础攻击类型TOP5" :items="typeTop"></r-chart>
 			</div>
 		</div>
 		<div v-show="playType==2">
@@ -148,7 +151,7 @@
 					:teams="teams" :obj="team_obj">
 				</t-rank>
 			</div>
-			<div class="list_Group over-hidden" :class="playType==2?fadeInl:fadeOut">
+			<div class="list_Group over-hidden" style="height:720px" :class="playType==2?fadeInl:fadeOut">
 				<l-list :items="threat" :threat_id="threat_id" @clickthreat="clickTreat"></l-list>
 			</div>
 			<div class="list_Step" :class="playType==2?fadeInr:fadeOut">
@@ -178,6 +181,7 @@
 			<div></div>
 		</div>
 		<span v-show="is_mouse" class="mouse_up" :style="mouse_position">{{mouse_text}}</span>
+		<img v-if="playType==1" :src="colorlist" alt="" class="color-list">
 		<canvas style="width:1000px;height:800px" id="canvas"></canvas>
 
 	</div>

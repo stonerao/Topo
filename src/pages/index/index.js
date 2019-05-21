@@ -9,6 +9,8 @@ import { GetRequest } from '../../utils/full'
 import '../../utils/template'
 import lock1 from '../../assets/image/loo-1.png'
 import lock2 from '../../assets/image/loo-2.png'
+import colorlist from '../../assets/image/colorlist.png'
+let query = GetRequest();
 let VM = new Vue({
     el: "#app",
     data() {
@@ -71,6 +73,7 @@ let VM = new Vue({
             lock: true,
             lock_1: lock1,
             lock_2: lock2,
+            colorlist: colorlist,
             is_data_show: false,
             sendInter2: null,
             ws2: null,
@@ -82,11 +85,14 @@ let VM = new Vue({
                 left: 0,
                 top: 0
             },
-            mouse_text: ""
+            mouse_text: "",
+            showBody:{
+                display:"block"
+            }
         }
     },
     created() {
-        let query = GetRequest();
+
         if (!query.hasOwnProperty("type")) {
             return
         }
@@ -114,8 +120,8 @@ let VM = new Vue({
     methods: {
         tabTypeSend() {
             //全局
-            let _TRUE = '{"send","true"}'
-            let _FALSE = '{"send","false"}'
+            let _TRUE = '{"send":"true"}'
+            let _FALSE = '{"send":"false"}'
             if (this.playType == 1) {
                 if (this.lock) {
                     // 解锁时，给基础攻击wb和复杂攻击wb都发送{ send: true }
@@ -275,7 +281,7 @@ let VM = new Vue({
                         let item = arr.shift()
                         let obj = {}
                         let index = 0;
-                        if (Array.isArray(item)) {
+                        if (typeof item == "object") {
                             while (index < this.nodes.length) {
                                 let node = this.nodes[index];
                                 if (item.start == node.id) {
@@ -313,8 +319,9 @@ let VM = new Vue({
 
             }
             this.ws.onerror = e => { };
-            this.ws.onclose = () => {
+            this.ws.onclose = (err) => {
                 //通道关闭了
+                console.log(err)
                 if (this.ws.readyState == 3) {
                     //五秒钟后重连
                     setTimeout(() => {
@@ -366,8 +373,9 @@ let VM = new Vue({
 
             }
             this.ws1.onerror = e => { };
-            this.ws1.onclose = () => {
+            this.ws1.onclose = (err) => {
                 //通道关闭了
+                console.log(err)
                 if (this.ws1.readyState == 3) {
                     //五秒钟后重连
                     setTimeout(() => {
@@ -399,8 +407,9 @@ let VM = new Vue({
                 })
             }
             this.ws2.onerror = e => { };
-            this.ws2.onclose = () => {
+            this.ws2.onclose = (err) => {
                 //通道关闭了
+                console.log(err)
                 if (this.ws2.readyState == 3) {
                     //五秒钟后重连
                     setTimeout(() => {
@@ -545,7 +554,7 @@ let VM = new Vue({
             }).then(res => {
                 this.loading = false
                 this.threat = res.list;
-                this.selectTeamid = res.switchId
+                this.selectTeamid = res.logoId
                 if (res.list.length == 0) {
                     typeof func == 'function' ? func([]) : null;
                     return false
@@ -558,6 +567,8 @@ let VM = new Vue({
 
                 }
                 typeof func == 'function' ? func(this.clone(this.threat)) : null;
+            }).catch(err => {
+                this.playType = 1;
             })
         },
         loadGlobal(item) {
@@ -569,7 +580,7 @@ let VM = new Vue({
             } else {
                 let obj = item.shift()
                 this.threat_id = obj.id;
-                this.getThreatList(obj.teamId, obj.id,() => {
+                this.getThreatList(obj.teamId, obj.id, () => {
                     this.getThreatInformation(obj.id, () => {
                         this.loadGlobal(item)
                     })
@@ -841,14 +852,16 @@ let VM = new Vue({
         ['node.type'](val) {
         },
         ['selectTeamid'](val) {
-            if (val && this.playType == 2) {
-                for (let i = 0; i < this.nodes.length; i++) {
-                    if (this.nodes[i].id == val) {
-                        topo.thingMeshTeam(this.nodes[i])
-                        return
+            setTimeout(() => {
+                if (val && this.playType == 2) {
+                    for (let i = 0; i < this.nodes.length; i++) {
+                        if (this.nodes[i].id == val) {
+                            topo.thingMeshTeam(this.nodes[i])
+                            return
+                        }
                     }
                 }
-            }
+            }, 300)
         },
         ['playType'](val) {
             this.tabTypeSend()
@@ -858,9 +871,6 @@ let VM = new Vue({
                 this.stepIndex = 0;
                 this.threat_id = ""
             }
-        },
-        threat_id(val) {
-            console.log(val)
         }
     }
 })
@@ -880,7 +890,7 @@ let topo = new Topo({
     cameraPosition: {
         x: 0,
         y: 1016,
-        z: 1701
+        z: query.type == 1 ? 1750 : 1900
     },
     click: function (data) {
         /* if (VM.playType == 2) {

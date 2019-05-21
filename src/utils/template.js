@@ -193,6 +193,15 @@ Vue.component("l-list", {
         getThreat(item, index) {
             this.threatIndex = index;
             this.$emit("clickthreat", item)
+        },
+        getTop(val){
+            let map = this.items.map(x => x.id)
+            let num = map.indexOf(val) 
+            if (num > 5) { 
+                document.getElementById("threatstep").scrollTop = (num - 5) * 59
+            } else {
+                document.getElementById("threatstep").scrollTop = 0
+            }
         }
 
     },
@@ -200,14 +209,13 @@ Vue.component("l-list", {
         initScroll("#threatstep")
     },
     watch: {
-        threat_id(val) {
-            let map = this.items.map(x => x.id)
-            let num = map.indexOf(val)
-            if (num > 5) {
-                document.getElementById("threatstep").scrollTop = (num - 5) * 59
-            } else {
-                document.getElementById("threatstep").scrollTop = 0
-            }
+        threat_id(val) { 
+            this.getTop(val)
+        },
+        items(val){
+            setTimeout(()=>{
+                this.getTop(this.threat_id)
+            },300)
         }
     }
 
@@ -260,7 +268,10 @@ Vue.component("r-step", {
         initScroll("#steps")
     },
     watch: {
-        sindex(val) {
+        items(){
+            document.getElementById("steps").scrollTop = 0;
+        },
+        sindex(val) { 
             let children = document.getElementById("steps").childNodes;
             let arr = []
             children.forEach((node, i) => {

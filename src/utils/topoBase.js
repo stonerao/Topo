@@ -259,7 +259,7 @@ export default class Topo extends Base {
                 // side: DoubleSide,
                 transparent: true,
                 depthWrite: false,
-                lineWidth: 20
+                 lineWidth:12
             }),
         }
     }
@@ -628,7 +628,12 @@ export default class Topo extends Base {
             geometry.vertices.push(new THREE.Vector3(...src));
         }
         var line = new MeshLine();
-        line.setGeometry(geometry, function (p) { return p });
+        if(type==5){
+            line.setGeometry(geometry);
+        }else{
+            line.setGeometry(geometry, function (p) { return p });
+        }
+        
         /*    if (Math.random() > 0.75) {
            } else if (Math.random() > 0.55) {
                line.setGeometry(geometry, function (p) { return 1 - p }); // makes width sinusoidal
@@ -650,6 +655,7 @@ export default class Topo extends Base {
         var interval = (n) => {
             if (n >= cinum) {
                 this.buildingAnimation(dst, 50)
+                let timeNumber = type == 5 ? 1500 / cinum:10
                 let t = setInterval(() => {
                     n--;
                     if (n < 0) {
@@ -659,7 +665,7 @@ export default class Topo extends Base {
                     } else {
                         line.advance(vector[cinum - 1])
                     }
-                })
+                }, timeNumber)
                 return
             } else {
                 n++
