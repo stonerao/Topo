@@ -870,6 +870,7 @@ let VM = new Vue({
                 this.ThreatInformation = []
                 this.stepIndex = 0;
                 this.threat_id = ""
+                this.selectTeamid = ""
             }
         }
     }
